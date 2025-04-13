@@ -3,8 +3,8 @@ package org.example.services;
 import org.example.models.NguoiDung;
 import org.example.repositories.NguoiDungRepository;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Service;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
+import org.springframework.stereotype.Service;
 
 import java.util.List;
 import java.util.Optional;
@@ -51,20 +51,23 @@ public class NguoiDungServices {
 
     // Lấy thông tin người dùng theo ID
     public NguoiDung layThongTinNguoiDung(int id) {
-        return nguoiDungRepository.findById(id)
-                .orElseThrow(() -> new RuntimeException("Không tìm thấy người dùng"));
+        Optional<NguoiDung> nguoiDung = nguoiDungRepository.findById(id);
+        if (nguoiDung.isEmpty()) {
+            throw new RuntimeException("Không tìm thấy người dùng");
+        }
+        return nguoiDung.get();
     }
 
     // Cập nhật thông tin người dùng
     public NguoiDung capNhatThongTin(NguoiDung nguoiDung) {
-        // Kiểm tra người dùng tồn tại
-        if (!nguoiDungRepository.existsById(nguoiDung.getIdTaiKhoan())) {
+        Optional<NguoiDung> existingUser = nguoiDungRepository.findById(nguoiDung.getIdTaiKhoan());
+        if (existingUser.isEmpty()) {
             throw new RuntimeException("Người dùng không tồn tại");
         }
 
         // Kiểm tra email mới có bị trùng không
-        Optional<NguoiDung> existingUser = nguoiDungRepository.findByUserEmail(nguoiDung.getUserEmail());
-        if (existingUser.isPresent() && existingUser.get().getIdTaiKhoan() != nguoiDung.getIdTaiKhoan()) {
+        Optional<NguoiDung> existingEmailUser = nguoiDungRepository.findByUserEmail(nguoiDung.getUserEmail());
+        if (existingEmailUser.isPresent() && existingEmailUser.get().getIdTaiKhoan() != nguoiDung.getIdTaiKhoan()) {
             throw new RuntimeException("Email đã được sử dụng bởi người dùng khác");
         }
 
@@ -88,7 +91,8 @@ public class NguoiDungServices {
 
     // Xóa người dùng
     public void xoaNguoiDung(int id) {
-        if (!nguoiDungRepository.existsById(id)) {
+        Optional<NguoiDung> nguoiDung = nguoiDungRepository.findById(id);
+        if (nguoiDung.isEmpty()) {
             throw new RuntimeException("Người dùng không tồn tại");
         }
         nguoiDungRepository.deleteById(id);
@@ -96,82 +100,14 @@ public class NguoiDungServices {
 
     // Lấy danh sách tất cả người dùng
     public List<NguoiDung> layDanhSachNguoiDung() {
-
         return nguoiDungRepository.findAll();
     }
 
-    // Thêm tài khoản mới (dành cho admin)
-    public NguoiDung themTaiKhoan(NguoiDung nguoiDung) {
-        // Kiểm tra username đã tồn tại
-        if (nguoiDungRepository.existsByUserName(nguoiDung.getUserName())) {
-            throw new RuntimeException("Tên đăng nhập đã tồn tại");
-        }
-
-        // Kiểm tra email đã tồn tại
-        if (nguoiDungRepository.existsByUserEmail(nguoiDung.getUserEmail())) {
-            throw new RuntimeException("Email đã được sử dụng");
-        }
-
-        // Mã hóa mật khẩu
-        String encodedPassword = passwordEncoder.encode(nguoiDung.getPassword());
-        nguoiDung.setPassword(encodedPassword);
-
-        // Lưu người dùng mới
-        return nguoiDungRepository.save(nguoiDung);
-    }
-
-    // Sửa thông tin tài khoản (dành cho admin)
-    public NguoiDung suaTaiKhoan(int id, NguoiDung nguoiDung) {
-        // Kiểm tra người dùng tồn tại
-        NguoiDung existingUser = layThongTinNguoiDung(id);
-
-        // Kiểm tra email mới có bị trùng không
-        Optional<NguoiDung> userWithEmail = nguoiDungRepository.findByUserEmail(nguoiDung.getUserEmail());
-        if (userWithEmail.isPresent() && userWithEmail.get().getIdTaiKhoan() != id) {
-            throw new RuntimeException("Email đã được sử dụng bởi người dùng khác");
-        }
-
-        // Cập nhật thông tin
-        existingUser.setUserName(nguoiDung.getUserName());
-        existingUser.setUserEmail(nguoiDung.getUserEmail());
-        
-        // Nếu có mật khẩu mới thì cập nhật
-        if (nguoiDung.getPassword() != null && !nguoiDung.getPassword().isEmpty()) {
-            String encodedPassword = passwordEncoder.encode(nguoiDung.getPassword());
-            existingUser.setPassword(encodedPassword);
-        }
-
-        return nguoiDungRepository.save(existingUser);
-    }
-
-    // Khóa tài khoản
-    public void khoaTaiKhoan(int id) {
-        NguoiDung nguoiDung = layThongTinNguoiDung(id);
-        // Thêm trường isLocked vào model NguoiDung nếu chưa có
-        // nguoiDung.setLocked(true);
-        nguoiDungRepository.save(nguoiDung);
-    }
-
-    // Mở khóa tài khoản
-    public void moKhoaTaiKhoan(int id) {
-        NguoiDung nguoiDung = layThongTinNguoiDung(id);
-        // Thêm trường isLocked vào model NguoiDung nếu chưa có
-        // nguoiDung.setLocked(false);
-        nguoiDungRepository.save(nguoiDung);
-    }
-
-    // Tìm kiếm người dùng theo tên
-    public List<NguoiDung> timKiemTheoTen(String ten) {
-        return nguoiDungRepository.findByUserNameContainingIgnoreCase(ten);
-    }
-
-    // Tìm kiếm người dùng theo email
-    public List<NguoiDung> timKiemTheoEmail(String email) {
-        return nguoiDungRepository.findByUserEmailContainingIgnoreCase(email);
-    }
-
-    // Tìm kiếm người dùng theo cả tên và email
+    // Tìm kiếm người dùng theo từ khóa
     public List<NguoiDung> timKiem(String keyword) {
+        if (keyword == null || keyword.trim().isEmpty()) {
+            return nguoiDungRepository.findAll();
+        }
         return nguoiDungRepository.findByUserNameContainingIgnoreCaseOrUserEmailContainingIgnoreCase(keyword, keyword);
     }
 }

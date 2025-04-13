@@ -1,4 +1,4 @@
-viet-- Chèn dữ liệu vào bảng danhmuckhoikienthuc
+
 INSERT INTO `danhmuckhoikienthuc` (`idKhoiKienThuc`, `tenKhoiKienThuc`, `tenKienThuc`, `hocPhan`, `loaiHocPhan`) VALUES
 (1, 'Kiến thức chung', 'Triết học Mác - Lênin', 'PHI101', 'Bắt buộc'),
 (2, 'Kiến thức chuyên ngành', 'Lập trình hướng đối tượng', 'OOP201', 'Bắt buộc'),
