@@ -37,5 +37,12 @@ public class KeHoachDayHoc {
         private Integer idHocPhan;
         private String maHP;
         private String tenHP;
+        private Integer soTinChi;
+        private Integer soTietLyThuyet;
+        private Integer soTietThucHanh;
+        private Integer soTietThucTap;
+        private Integer loaiHocPhan;
+        private Integer tongSoTiet;
+        private Integer heSoHocPhan;
     }
 } 

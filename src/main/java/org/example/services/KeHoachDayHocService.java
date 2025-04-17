@@ -72,6 +72,13 @@ public class KeHoachDayHocService {
                     info.setIdHocPhan(hocPhan.getIdHocPhan());
                     info.setMaHP(hocPhan.getMaHP());
                     info.setTenHP(hocPhan.getTenHP());
+                    info.setSoTinChi(hocPhan.getSoTinChi());
+                    info.setSoTietLyThuyet(hocPhan.getSoTietLyThuyet());
+                    info.setSoTietThucHanh(hocPhan.getSoTietThucHanh());
+                    info.setSoTietThucTap(hocPhan.getSoTietThucTap());
+                    info.setLoaiHocPhan(hocPhan.getLoaiHocPhan());
+                    info.setTongSoTiet(hocPhan.getTongSoTiet());
+                    info.setHeSoHocPhan(hocPhan.getHeSoHocPhan());
                     hocPhanInfos.add(info);
                 }
             } catch (NumberFormatException e) {
