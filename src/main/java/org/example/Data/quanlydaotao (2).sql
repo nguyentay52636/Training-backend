@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Máy chủ: 127.0.0.1
--- Thời gian đã tạo: Th4 25, 2025 lúc 11:37 AM
+-- Thời gian đã tạo: Th4 25, 2025 lúc 12:01 PM
 -- Phiên bản máy phục vụ: 10.4.32-MariaDB
 -- Phiên bản PHP: 8.0.30
 
@@ -98,11 +98,10 @@ CREATE TABLE `ctdt_giangvien` (
 --
 
 INSERT INTO `ctdt_giangvien` (`idGiangVien`, `idTaiKhoan`, `maGiangVien`, `tenGiangVien`, `chucDanh`, `namPhong`, `trinhDo`, `nuoc`, `namTotNghiep`) VALUES
-(1, 2, 'GV001', 'Trần Thị B', 'PGS.TS', '2015', 'Tiến sĩ', 'Việt Nam', '2012'),
-(2, 3, 'GV002', 'Lê Thị C', 'TS', '2017', 'Thạc sĩ', 'Việt Nam', '2015'),
-(3, 2, 'GV003', 'Nguyễn Văn A', 'ThS', '2018', 'Thạc sĩ', 'Anh', '2014'),
-(4, 3, 'GV004', 'Phạm Văn D', 'TS', '2020', 'Tiến sĩ', 'Mỹ', '2016'),
-(5, 2, 'GV005', 'Đoàn Thị E', 'GS', '2022', 'Tiến sĩ', 'Nhật Bản', '2010');
+(1, 1, 'GV001', 'Trần Thị B', 'PGS.TS', '2015', 'Tiến sĩ', 'Việt Nam', '2012'),
+(2, 2, 'GV002', 'Lê Thị C', 'TS', '2017', 'Thạc sĩ', 'Việt Nam', '2015'),
+(3, 3, 'GV003', 'Nguyễn Văn A', 'ThS', '2018', 'Thạc sĩ', 'Anh', '2014'),
+(4, 4, 'GV004', 'Phạm Văn D', 'TS', '2020', 'Tiến sĩ', 'Mỹ', '2016');
 
 -- --------------------------------------------------------
 
@@ -273,8 +272,7 @@ INSERT INTO `ctdt_phanconggiangday` (`idPhanCong`, `idGiangVien`, `idHocPhan`, `
 (31, 1, 1, 'Trần Thị B', 1, 'Toán rời rạc', 45, 45),
 (32, 2, 2, 'Lê Thị C', 1, 'Lập trình C', 60, 60),
 (33, 3, 3, 'Nguyễn Văn ', 2, 'CSDL', 45, 45),
-(34, 4, 4, 'Phạm Văn D', 2, 'Mạng máy tính', 45, 44),
-(35, 5, 5, 'Đoàn Thị E', 3, 'PTTKHT', 60, 60);
+(34, 4, 4, 'Phạm Văn D', 2, 'Mạng máy tính', 45, 44);
 
 -- --------------------------------------------------------
 
