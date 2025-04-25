@@ -133,4 +133,11 @@ public class NguoiDungController {
         List<NguoiDung> users = nguoiDungServices.timKiem(keyword);
         return ResponseEntity.ok(users);
     }
+
+    // Kiểm tra người dùng có tồn tại hay không
+    @GetMapping("/kiemtra/{id}")
+    public ResponseEntity<?> kiemTraNguoiDungTonTai(@PathVariable("id") int id) {
+        String message = nguoiDungServices.kiemTraNguoiDungTonTai(id);
+        return ResponseEntity.ok(Map.of("message", message));
+    }
 }

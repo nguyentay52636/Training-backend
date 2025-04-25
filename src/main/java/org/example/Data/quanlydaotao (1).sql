@@ -3,9 +3,9 @@
 -- https://www.phpmyadmin.net/
 --
 -- Máy chủ: 127.0.0.1
--- Thời gian đã tạo: Th4 14, 2025 lúc 06:37 PM
+-- Thời gian đã tạo: Th4 25, 2025 lúc 11:37 AM
 -- Phiên bản máy phục vụ: 10.4.32-MariaDB
--- Phiên bản PHP: 8.2.12
+-- Phiên bản PHP: 8.0.30
 
 SET SQL_MODE = "NO_AUTO_VALUE_ON_ZERO";
 START TRANSACTION;
@@ -18,7 +18,7 @@ SET time_zone = "+00:00";
 /*!40101 SET NAMES utf8mb4 */;
 
 --
--- Cơ sở dữ liệu: `initqldaotao`
+-- Cơ sở dữ liệu: `quanlydaotao`
 --
 
 -- --------------------------------------------------------
@@ -142,21 +142,21 @@ INSERT INTO `ctdt_hocphan` (`idHocPhan`, `maHP`, `tenHP`, `soTinChi`, `soTietLyT
 
 CREATE TABLE `ctdt_kehoachdayhoc` (
   `idChuyenNganh` int(11) NOT NULL,
-  `idHocPhan` int(11) NOT NULL,
   `tenChuyenNganh` varchar(150) NOT NULL,
-  `hocKyThucHien` int(11) NOT NULL
+  `hocKyThucHien` int(11) NOT NULL,
+  `idHocPhan` varchar(255) NOT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 --
 -- Đang đổ dữ liệu cho bảng `ctdt_kehoachdayhoc`
 --
 
-INSERT INTO `ctdt_kehoachdayhoc` (`idChuyenNganh`, `idHocPhan`, `tenChuyenNganh`, `hocKyThucHien`) VALUES
-(1, 1, 'Khoa học máy tính', 1),
-(2, 2, 'Khoa học máy tính', 1),
-(3, 3, 'Khoa học máy tính', 2),
-(4, 4, 'CNTT', 2),
-(5, 5, 'Công nghệ phần mềm', 3);
+INSERT INTO `ctdt_kehoachdayhoc` (`idChuyenNganh`, `tenChuyenNganh`, `hocKyThucHien`, `idHocPhan`) VALUES
+(1, 'Khoa học máy tính', 1, ''),
+(2, 'Khoa học máy tính', 1, ''),
+(3, 'Khoa học máy tính', 2, ''),
+(4, 'CNTT', 2, ''),
+(5, 'Công nghệ phần mềm', 3, '');
 
 -- --------------------------------------------------------
 
@@ -166,7 +166,6 @@ INSERT INTO `ctdt_kehoachdayhoc` (`idChuyenNganh`, `idHocPhan`, `tenChuyenNganh`
 
 CREATE TABLE `ctdt_kehoachmonhom` (
   `id` int(11) NOT NULL,
-  `idHocPhan` int(11) NOT NULL,
   `namHoc` varchar(255) NOT NULL,
   `soNhom` int(11) NOT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
@@ -175,12 +174,12 @@ CREATE TABLE `ctdt_kehoachmonhom` (
 -- Đang đổ dữ liệu cho bảng `ctdt_kehoachmonhom`
 --
 
-INSERT INTO `ctdt_kehoachmonhom` (`id`, `idHocPhan`, `namHoc`, `soNhom`) VALUES
-(1, 1, '2023-2024', 3),
-(2, 2, '2023-2024', 2),
-(3, 3, '2023-2024', 2),
-(4, 4, '2023-2024', 1),
-(5, 5, '2023-2024', 2);
+INSERT INTO `ctdt_kehoachmonhom` (`id`, `namHoc`, `soNhom`) VALUES
+(1, '2023-2024', 3),
+(2, '2023-2024', 2),
+(3, '2023-2024', 2),
+(4, '2023-2024', 1),
+(5, '2023-2024', 2);
 
 -- --------------------------------------------------------
 
@@ -191,7 +190,7 @@ INSERT INTO `ctdt_kehoachmonhom` (`id`, `idHocPhan`, `namHoc`, `soNhom`) VALUES
 CREATE TABLE `ctdt_khoikienthuc` (
   `idKhoiKienThuc` int(11) NOT NULL,
   `tenKhoiKienThuc` varchar(150) NOT NULL,
-  `idKienThuc` int(11) NOT NULL
+  `idKienThuc` varchar(255) NOT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 --
@@ -199,11 +198,11 @@ CREATE TABLE `ctdt_khoikienthuc` (
 --
 
 INSERT INTO `ctdt_khoikienthuc` (`idKhoiKienThuc`, `tenKhoiKienThuc`, `idKienThuc`) VALUES
-(21, 'Toán cơ bản', 1),
-(22, 'Lập trình cơ bản', 2),
-(23, 'Cơ sở dữ liệu', 3),
-(24, 'Mạng máy tính', 4),
-(25, 'Chuyên ngành phần mềm', 5);
+(21, 'Toán cơ bản', '1,2,3'),
+(22, 'Lập trình cơ bản', '2,3,4'),
+(23, 'Cơ sở dữ liệu', '3,4,5'),
+(24, 'Mạng máy tính', '4,5,1'),
+(25, 'Chuyên ngành phần mềm', '5,1,2');
 
 -- --------------------------------------------------------
 
@@ -234,8 +233,8 @@ INSERT INTO `ctdt_khungchuongtrinh` (`id`, `idThongTin`) VALUES
 CREATE TABLE `ctdt_kienthuc` (
   `idKienThuc` int(11) NOT NULL,
   `tenKienThuc` varchar(200) NOT NULL,
-  `idHocPhan` int(11) NOT NULL,
-  `loaiHocPhan` int(11) NOT NULL COMMENT '0: tự chọn, 1: bắt buộc'
+  `idHocPhan` varchar(255) NOT NULL,
+  `loaiHocPhan` varchar(255) DEFAULT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 --
@@ -243,11 +242,11 @@ CREATE TABLE `ctdt_kienthuc` (
 --
 
 INSERT INTO `ctdt_kienthuc` (`idKienThuc`, `tenKienThuc`, `idHocPhan`, `loaiHocPhan`) VALUES
-(1, 'Toán rời rạc', 1, 0),
-(2, 'Lập trình C', 2, 0),
-(3, 'CSDL', 3, 0),
-(4, 'Mạng máy tính', 4, 0),
-(5, 'Phân tích thiết kế hệ thống', 5, 0);
+(1, 'Toán rời rạc', '1,2', '0'),
+(2, 'Lập trình C', '2,3', '0'),
+(3, 'CSDL', '3,4', '0'),
+(4, 'Mạng máy tính', '4,5', '0'),
+(5, 'Phân tích thiết kế hệ thống', '5,1', '0');
 
 -- --------------------------------------------------------
 
@@ -327,8 +326,7 @@ INSERT INTO `ctdt_user` (`id`, `userName`, `userEmail`, `password`, `role`) VALU
 (1, 'nguyenvana', 'vana@example.com', 'hashedpwd1', 0),
 (2, 'tranthib', 'thib@example.com', 'hashedpwd2', 0),
 (3, 'lethic', 'thic@example.com', 'hashedpwd3', 0),
-(4, 'phamvand', 'vand@example.com', 'hashedpwd4', 0),
-(5, 'doanthie', 'thie@example.com', 'hashedpwd5', 0);
+(4, 'phamvand', 'vand@example.com', 'hashedpwd4', 0);
 
 --
 -- Chỉ mục cho các bảng đã đổ
@@ -364,15 +362,13 @@ ALTER TABLE `ctdt_hocphan`
 -- Chỉ mục cho bảng `ctdt_kehoachdayhoc`
 --
 ALTER TABLE `ctdt_kehoachdayhoc`
-  ADD PRIMARY KEY (`idChuyenNganh`),
-  ADD KEY `FK_ctdt_kehoachdayhoc_ctdt_hocphan` (`idHocPhan`);
+  ADD PRIMARY KEY (`idChuyenNganh`);
 
 --
 -- Chỉ mục cho bảng `ctdt_kehoachmonhom`
 --
 ALTER TABLE `ctdt_kehoachmonhom`
-  ADD PRIMARY KEY (`id`),
-  ADD KEY `FK_ctdt_kehoachmonhom_ctdt_hocphan` (`idHocPhan`);
+  ADD PRIMARY KEY (`id`);
 
 --
 -- Chỉ mục cho bảng `ctdt_khoikienthuc`
@@ -459,7 +455,7 @@ ALTER TABLE `ctdt_kehoachmonhom`
 -- AUTO_INCREMENT cho bảng `ctdt_khoikienthuc`
 --
 ALTER TABLE `ctdt_khoikienthuc`
-  MODIFY `idKhoiKienThuc` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=26;
+  MODIFY `idKhoiKienThuc` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=27;
 
 --
 -- AUTO_INCREMENT cho bảng `ctdt_khungchuongtrinh`
@@ -471,7 +467,7 @@ ALTER TABLE `ctdt_khungchuongtrinh`
 -- AUTO_INCREMENT cho bảng `ctdt_kienthuc`
 --
 ALTER TABLE `ctdt_kienthuc`
-  MODIFY `idKienThuc` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=11;
+  MODIFY `idKienThuc` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=12;
 
 --
 -- AUTO_INCREMENT cho bảng `ctdt_phanconggiangday`
@@ -508,34 +504,10 @@ ALTER TABLE `ctdt_giangvien`
   ADD CONSTRAINT `FK_ctdt_giangvien_ctdt_user` FOREIGN KEY (`idTaiKhoan`) REFERENCES `ctdt_user` (`id`) ON DELETE NO ACTION ON UPDATE NO ACTION;
 
 --
--- Các ràng buộc cho bảng `ctdt_kehoachdayhoc`
---
-ALTER TABLE `ctdt_kehoachdayhoc`
-  ADD CONSTRAINT `FK_ctdt_kehoachdayhoc_ctdt_hocphan` FOREIGN KEY (`idHocPhan`) REFERENCES `ctdt_hocphan` (`idHocPhan`) ON DELETE NO ACTION ON UPDATE NO ACTION;
-
---
--- Các ràng buộc cho bảng `ctdt_kehoachmonhom`
---
-ALTER TABLE `ctdt_kehoachmonhom`
-  ADD CONSTRAINT `FK_ctdt_kehoachmonhom_ctdt_hocphan` FOREIGN KEY (`idHocPhan`) REFERENCES `ctdt_hocphan` (`idHocPhan`) ON DELETE NO ACTION ON UPDATE NO ACTION;
-
---
--- Các ràng buộc cho bảng `ctdt_khoikienthuc`
---
-ALTER TABLE `ctdt_khoikienthuc`
-  ADD CONSTRAINT `FK_ctdt_khoikienthuc_ctct_kienthuc` FOREIGN KEY (`idKienThuc`) REFERENCES `ctdt_kienthuc` (`idKienThuc`) ON DELETE NO ACTION ON UPDATE NO ACTION;
-
---
 -- Các ràng buộc cho bảng `ctdt_khungchuongtrinh`
 --
 ALTER TABLE `ctdt_khungchuongtrinh`
   ADD CONSTRAINT `FK_ctdt_khungchuongtrinh_ctdt_thongtinchung` FOREIGN KEY (`idThongTin`) REFERENCES `ctdt_thongtinchung` (`id`) ON DELETE NO ACTION ON UPDATE NO ACTION;
-
---
--- Các ràng buộc cho bảng `ctdt_kienthuc`
---
-ALTER TABLE `ctdt_kienthuc`
-  ADD CONSTRAINT `FK_ctct_kienthuc_ctdt_hocphan` FOREIGN KEY (`idHocPhan`) REFERENCES `ctdt_hocphan` (`idHocPhan`) ON DELETE NO ACTION ON UPDATE NO ACTION;
 
 --
 -- Các ràng buộc cho bảng `ctdt_phanconggiangday`

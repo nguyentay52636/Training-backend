@@ -1,10 +1,14 @@
 package org.example.services;
 
 import org.example.models.NguoiDung;
+import org.example.models.GiangVien;
 import org.example.repositories.NguoiDungRepository;
+import org.example.repositories.GiangVienRepository;
+import org.example.repositories.PhanCongGiangDayRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 import java.util.Optional;
@@ -14,6 +18,12 @@ public class NguoiDungServices {
 
     @Autowired
     private NguoiDungRepository nguoiDungRepository;
+
+    @Autowired
+    private GiangVienRepository giangVienRepository;
+
+    @Autowired
+    private PhanCongGiangDayRepository phanCongGiangDayRepository;
 
     @Autowired
     private BCryptPasswordEncoder passwordEncoder;
@@ -113,11 +123,22 @@ public class NguoiDungServices {
         return nguoiDungRepository.save(nguoiDung);
     }
 
-    // Xóa người dùng
+    @Transactional
     public void xoaNguoiDung(int id) {
         if (!nguoiDungRepository.existsById(id)) {
             throw new RuntimeException("Người dùng không tồn tại");
         }
+        
+        // Xóa thông tin giảng viên và phân công giảng dạy nếu có
+        Optional<GiangVien> giangVien = giangVienRepository.findByIdTaiKhoan(id);
+        if (giangVien.isPresent()) {
+            // Xóa phân công giảng dạy trước
+            phanCongGiangDayRepository.deleteByIdGiangVien(giangVien.get().getIdGiangVien());
+            // Sau đó xóa thông tin giảng viên
+            giangVienRepository.deleteByIdTaiKhoan(id);
+        }
+        
+        // Xóa người dùng
         nguoiDungRepository.deleteById(id);
     }
 
@@ -169,5 +190,18 @@ public class NguoiDungServices {
             return nguoiDungRepository.findAll();
         }
         return nguoiDungRepository.findByUserNameContainingIgnoreCaseOrUserEmailContainingIgnoreCase(keyword, keyword);
+    }
+
+    /**
+     * Kiểm tra xem người dùng có tồn tại trong hệ thống hay không
+     * @param id ID của người dùng cần kiểm tra
+     * @return Thông báo về trạng thái tồn tại của người dùng
+     */
+    public String kiemTraNguoiDungTonTai(int id) {
+        if (nguoiDungRepository.existsById(id)) {
+            return "Người dùng có tồn tại trong hệ thống";
+        } else {
+            return "Người dùng không tồn tại trong hệ thống";
+        }
     }
 }
