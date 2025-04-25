@@ -1,10 +1,14 @@
 package org.example.services;
 
 import org.example.models.NguoiDung;
+import org.example.models.GiangVien;
 import org.example.repositories.NguoiDungRepository;
+import org.example.repositories.GiangVienRepository;
+import org.example.repositories.PhanCongGiangDayRepository;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 import java.util.Optional;
@@ -14,6 +18,12 @@ public class NguoiDungServices {
 
     @Autowired
     private NguoiDungRepository nguoiDungRepository;
+
+    @Autowired
+    private GiangVienRepository giangVienRepository;
+
+    @Autowired
+    private PhanCongGiangDayRepository phanCongGiangDayRepository;
 
     @Autowired
     private BCryptPasswordEncoder passwordEncoder;
@@ -28,11 +38,12 @@ public class NguoiDungServices {
             throw new RuntimeException("Email đã được sử dụng");
         }
 
-        // Mã hóa mật khẩu
-        String encodedPassword = passwordEncoder.encode(nguoiDung.getPassword());
-        nguoiDung.setPassword(encodedPassword);
+        // Kiểm tra role hợp lệ
+        if (nguoiDung.getRole() == null || nguoiDung.getRole() < 0 || nguoiDung.getRole() > 2) {
+            throw new RuntimeException("Role không hợp lệ. Role phải là 0 (User), 1 (Giảng viên) hoặc 2 (Admin)");
+        }
 
-        // Lưu người dùng mới
+        nguoiDung.setPassword(passwordEncoder.encode(nguoiDung.getPassword()));
         return nguoiDungRepository.save(nguoiDung);
     }
 
@@ -51,50 +62,83 @@ public class NguoiDungServices {
 
     // Lấy thông tin người dùng theo ID
     public NguoiDung layThongTinNguoiDung(int id) {
-        Optional<NguoiDung> nguoiDung = nguoiDungRepository.findById(id);
-        if (nguoiDung.isEmpty()) {
-            throw new RuntimeException("Không tìm thấy người dùng");
-        }
-        return nguoiDung.get();
+        return nguoiDungRepository.findById(id)
+                .orElseThrow(() -> new RuntimeException("Không tìm thấy người dùng"));
     }
 
     // Cập nhật thông tin người dùng
     public NguoiDung capNhatThongTin(NguoiDung nguoiDung) {
-        Optional<NguoiDung> existingUser = nguoiDungRepository.findById(nguoiDung.getIdTaiKhoan());
-        if (existingUser.isEmpty()) {
-            throw new RuntimeException("Người dùng không tồn tại");
-        }
+        NguoiDung existingUser = nguoiDungRepository.findById(nguoiDung.getId())
+                .orElseThrow(() -> new RuntimeException("Người dùng không tồn tại"));
 
         // Kiểm tra email mới có bị trùng không
-        Optional<NguoiDung> existingEmailUser = nguoiDungRepository.findByUserEmail(nguoiDung.getUserEmail());
-        if (existingEmailUser.isPresent() && existingEmailUser.get().getIdTaiKhoan() != nguoiDung.getIdTaiKhoan()) {
+        Optional<NguoiDung> userWithEmail = nguoiDungRepository.findByUserEmail(nguoiDung.getUserEmail());
+        if (userWithEmail.isPresent() && !userWithEmail.get().getId().equals(nguoiDung.getId())) {
             throw new RuntimeException("Email đã được sử dụng bởi người dùng khác");
         }
 
+        // Kiểm tra role hợp lệ nếu được cung cấp
+        if (nguoiDung.getRole() != null) {
+            if (nguoiDung.getRole() < 0 || nguoiDung.getRole() > 2) {
+                throw new RuntimeException("Role không hợp lệ. Role phải là 0 (User), 1 (Giảng viên) hoặc 2 (Admin)");
+            }
+        } else {
+            // Nếu không cung cấp role, giữ nguyên role cũ
+            nguoiDung.setRole(existingUser.getRole());
+        }
+
+        // Giữ nguyên password cũ
+        nguoiDung.setPassword(existingUser.getPassword());
+        
         return nguoiDungRepository.save(nguoiDung);
     }
 
     // Đổi mật khẩu
-    public void doiMatKhau(int id, String matKhauCu, String matKhauMoi) {
+    public NguoiDung doiMatKhau(int id, String matKhauCu, String matKhauMoi) {
         NguoiDung nguoiDung = layThongTinNguoiDung(id);
 
         // Kiểm tra mật khẩu cũ
+        if (matKhauCu == null || matKhauCu.trim().isEmpty()) {
+            throw new RuntimeException("Mật khẩu cũ không được để trống");
+        }
+
         if (!passwordEncoder.matches(matKhauCu, nguoiDung.getPassword())) {
             throw new RuntimeException("Mật khẩu cũ không đúng");
         }
 
+        // Kiểm tra mật khẩu mới
+        if (matKhauMoi == null || matKhauMoi.trim().isEmpty()) {
+            throw new RuntimeException("Mật khẩu mới không được để trống");
+        }
+
+        if (matKhauMoi.length() < 6) {
+            throw new RuntimeException("Mật khẩu mới phải có ít nhất 6 ký tự");
+        }
+
         // Mã hóa và cập nhật mật khẩu mới
-        String encodedPassword = passwordEncoder.encode(matKhauMoi);
-        nguoiDung.setPassword(encodedPassword);
-        nguoiDungRepository.save(nguoiDung);
+        String encodedNewPassword = passwordEncoder.encode(matKhauMoi);
+        nguoiDung.setPassword(encodedNewPassword);
+        
+        // Lưu và trả về người dùng đã cập nhật
+        return nguoiDungRepository.save(nguoiDung);
     }
 
-    // Xóa người dùng
+    @Transactional
     public void xoaNguoiDung(int id) {
-        Optional<NguoiDung> nguoiDung = nguoiDungRepository.findById(id);
-        if (nguoiDung.isEmpty()) {
+        if (!nguoiDungRepository.existsById(id)) {
             throw new RuntimeException("Người dùng không tồn tại");
         }
+        
+        // Xóa thông tin giảng viên và phân công giảng dạy nếu có
+        Optional<GiangVien> giangVien = giangVienRepository.findByIdTaiKhoan(id);
+        if (giangVien.isPresent()) {
+            // Xóa phân công giảng dạy trước
+            phanCongGiangDayRepository.deleteByIdGiangVien(giangVien.get().getIdGiangVien());
+            // Sau đó xóa thông tin giảng viên
+            giangVienRepository.deleteByIdTaiKhoan(id);
+        }
+        
+        // Xóa người dùng
         nguoiDungRepository.deleteById(id);
     }
 
@@ -103,11 +147,61 @@ public class NguoiDungServices {
         return nguoiDungRepository.findAll();
     }
 
-    // Tìm kiếm người dùng theo từ khóa
+    // Thêm tài khoản mới (dành cho admin)
+    public NguoiDung themTaiKhoan(NguoiDung nguoiDung, int adminId) {
+        // Kiểm tra quyền admin
+        NguoiDung admin = layThongTinNguoiDung(adminId);
+        if (!admin.isAdmin()) {
+            throw new RuntimeException("Không có quyền thực hiện thao tác này");
+        }
+
+        if (nguoiDungRepository.existsByUserName(nguoiDung.getUserName())) {
+            throw new RuntimeException("Tên đăng nhập đã tồn tại");
+        }
+
+        if (nguoiDungRepository.existsByUserEmail(nguoiDung.getUserEmail())) {
+            throw new RuntimeException("Email đã được sử dụng");
+        }
+
+        nguoiDung.setPassword(passwordEncoder.encode(nguoiDung.getPassword()));
+        return nguoiDungRepository.save(nguoiDung);
+    }
+
+    // Cập nhật role người dùng (chỉ admin)
+    public NguoiDung capNhatRole(int userId, int newRole, int adminId) {
+        // Kiểm tra quyền admin
+        NguoiDung admin = layThongTinNguoiDung(adminId);
+        if (!admin.isAdmin()) {
+            throw new RuntimeException("Không có quyền thực hiện thao tác này");
+        }
+
+        if (newRole < 0 || newRole > 2) {
+            throw new RuntimeException("Role không hợp lệ");
+        }
+
+        NguoiDung nguoiDung = layThongTinNguoiDung(userId);
+        nguoiDung.setRole(newRole);
+        return nguoiDungRepository.save(nguoiDung);
+    }
+
+    // Tìm kiếm người dùng
     public List<NguoiDung> timKiem(String keyword) {
         if (keyword == null || keyword.trim().isEmpty()) {
             return nguoiDungRepository.findAll();
         }
         return nguoiDungRepository.findByUserNameContainingIgnoreCaseOrUserEmailContainingIgnoreCase(keyword, keyword);
+    }
+
+    /**
+     * Kiểm tra xem người dùng có tồn tại trong hệ thống hay không
+     * @param id ID của người dùng cần kiểm tra
+     * @return Thông báo về trạng thái tồn tại của người dùng
+     */
+    public String kiemTraNguoiDungTonTai(int id) {
+        if (nguoiDungRepository.existsById(id)) {
+            return "Người dùng có tồn tại trong hệ thống";
+        } else {
+            return "Người dùng không tồn tại trong hệ thống";
+        }
     }
 }
