@@ -15,6 +15,9 @@ public class GiangVien {
     @Column(name = "idTaiKhoan")
     private Integer idTaiKhoan;
 
+    @Transient
+    private NguoiDung nguoiDung;
+
     @NotBlank(message = "Mã giảng viên không được để trống")
     @Size(max = 50, message = "Mã giảng viên không được vượt quá 50 ký tự")
     @Column(name = "maGiangVien", nullable = false, length = 50)
@@ -122,4 +125,12 @@ public class GiangVien {
     public void setNamTotNghiep(String namTotNghiep) {
         this.namTotNghiep = namTotNghiep;
     }
+
+    public NguoiDung getNguoiDung() {
+        return nguoiDung;
+    }
+
+    public void setNguoiDung(NguoiDung nguoiDung) {
+        this.nguoiDung = nguoiDung;
+    }   
 } 

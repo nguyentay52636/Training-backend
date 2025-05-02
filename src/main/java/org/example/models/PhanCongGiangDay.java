@@ -21,10 +21,6 @@ public class PhanCongGiangDay {
     @Column(name = "idHocPhan", nullable = false)
     private Integer idHocPhan;
 
-    @NotBlank(message = "Tên giảng viên không được để trống")
-    @Size(max = 150, message = "Tên giảng viên không được vượt quá 150 ký tự")
-    @Column(name = "tenGiangVien", nullable = false, length = 150)
-    private String tenGiangVien;
 
     @NotNull(message = "Học kỳ không được để trống")
     @Column(name = "hocKy", nullable = false)
@@ -43,6 +39,13 @@ public class PhanCongGiangDay {
     @Column(name = "soTietThucTe", nullable = false)
     private Integer soTietThucTe;
 
+    @Transient
+    private GiangVien giangVien;
+
+    @Transient
+    private HocPhan hocPhan;
+    
+    
     // Getters and Setters
     public Integer getIdPhanCong() {
         return idPhanCong;
@@ -68,13 +71,6 @@ public class PhanCongGiangDay {
         this.idHocPhan = idHocPhan;
     }
 
-    public String getTenGiangVien() {
-        return tenGiangVien;
-    }
-
-    public void setTenGiangVien(String tenGiangVien) {
-        this.tenGiangVien = tenGiangVien;
-    }
 
     public Integer getHocKy() {
         return hocKy;
@@ -107,4 +103,22 @@ public class PhanCongGiangDay {
     public void setSoTietThucTe(Integer soTietThucTe) {
         this.soTietThucTe = soTietThucTe;
     }
+
+    public GiangVien getGiangVien() {
+        return giangVien;
+    }
+
+    public void setGiangVien(GiangVien giangVien) {
+        this.giangVien = giangVien;
+    }   
+
+    public HocPhan getHocPhan() {
+        return hocPhan;
+    }   
+
+    public void setHocPhan(HocPhan hocPhan) {
+        this.hocPhan = hocPhan;
+    }
+    
+    
 } 
