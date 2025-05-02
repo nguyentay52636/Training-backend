@@ -12,8 +12,8 @@ import java.util.List;
 public interface KhoiKienThucRepository extends JpaRepository<KhoiKienThuc, Integer> {
     boolean existsByIdKhoiKienThuc(Integer idKhoiKienThuc);
     
-    @Query("SELECT k FROM KhoiKienThuc k WHERE k.idKienThuc LIKE %:idKienThuc%")
-    List<KhoiKienThuc> findByKienThucId(@Param("idKienThuc") String idKienThuc);
+    @Query(value = "SELECT * FROM ctdt_khoikienthuc WHERE JSON_CONTAINS(idKienThuc, CAST(:kienThucId AS JSON), '$') = 1", nativeQuery = true)
+    List<KhoiKienThuc> findByKienThucId(@Param("kienThucId") Integer kienThucId);
     
     @Query("SELECT k FROM KhoiKienThuc k WHERE LOWER(k.tenKhoiKienThuc) LIKE LOWER(CONCAT('%', :tenKhoiKienThuc, '%'))")
     List<KhoiKienThuc> findByTenKhoiKienThucContainingIgnoreCase(@Param("tenKhoiKienThuc") String tenKhoiKienThuc);

@@ -64,15 +64,14 @@ public class KhoiKienThucController {
     }
 
     @GetMapping
-    public ResponseEntity<?> layTatCaKhoiKienThuc() {
-        List<KhoiKienThuc> khoiKienThucs = khoiKienThucService.layTatCaKhoiKienThuc();
-        return ResponseEntity.ok(khoiKienThucs);
+    public List<KhoiKienThuc> layTatCaKhoiKienThuc() {
+        return khoiKienThucService.layTatCaKhoiKienThuc();
     }
 
     @GetMapping("/{id}")
-    public ResponseEntity<?> layKhoiKienThucById(@PathVariable Integer id) {
+    public ResponseEntity<KhoiKienThuc> layKhoiKienThucById(@PathVariable Integer id) {
         KhoiKienThuc khoiKienThuc = khoiKienThucService.layKhoiKienThucById(id);
-        return ResponseEntity.ok(khoiKienThuc);
+        return khoiKienThuc != null ? ResponseEntity.ok(khoiKienThuc) : ResponseEntity.notFound().build();
     }
 
     @PostMapping("/{idKhoiKienThuc}/kien-thuc-moi")
@@ -97,5 +96,10 @@ public class KhoiKienThucController {
         KhoiKienThuc updatedKhoiKienThuc = khoiKienThucService.themKienThucMoiVaoKhoi(
                 idKhoiKienThuc, tenKienThuc, loaiHocPhan);
         return ResponseEntity.ok(updatedKhoiKienThuc);
+    }
+
+    @GetMapping("/kien-thuc/{kienThucId}")
+    public List<KhoiKienThuc> getKhoiKienThucByKienThucId(@PathVariable Integer kienThucId) {
+        return khoiKienThucService.findByKienThucId(kienThucId);
     }
 } 
