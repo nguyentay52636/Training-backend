@@ -2,8 +2,10 @@ package org.example.services;
 
 import org.example.models.KhoiKienThuc;
 import org.example.models.KienThuc;
+import org.example.models.HocPhan;
 import org.example.repositories.KhoiKienThucRepository;
 import org.example.repositories.KienThucRepository;
+import org.example.repositories.HocPhanRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -21,6 +23,9 @@ public class KhoiKienThucService {
 
     @Autowired
     private KienThucRepository kienThucRepository;
+
+    @Autowired
+    private HocPhanRepository hocPhanRepository;
 
     @Transactional
     public KhoiKienThuc themKhoiKienThuc(KhoiKienThuc khoiKienThuc) {
@@ -106,6 +111,28 @@ public class KhoiKienThucService {
         return khoiKienThucRepository.save(khoiKienThuc);
     }
 
+    @Transactional
+    public KhoiKienThuc themKienThucMoiVaoKhoi(Integer idKhoiKienThuc, String tenKienThuc, String loaiHocPhan) {
+        KhoiKienThuc khoiKienThuc = khoiKienThucRepository.findById(idKhoiKienThuc)
+                .orElseThrow(() -> new RuntimeException("Khối kiến thức không tồn tại"));
+
+        KienThuc kienThucMoi = new KienThuc();
+        kienThucMoi.setTenKienThuc(tenKienThuc);
+        kienThucMoi.setLoaiHocPhan(loaiHocPhan);
+        kienThucMoi.setIdHocPhan("");
+
+        KienThuc savedKienThuc = kienThucRepository.save(kienThucMoi);
+
+        String currentIds = khoiKienThuc.getIdKienThuc();
+        if (currentIds == null || currentIds.isEmpty()) {
+            khoiKienThuc.setIdKienThuc(String.valueOf(savedKienThuc.getIdKienThuc()));
+        } else {
+            khoiKienThuc.setIdKienThuc(currentIds + "," + savedKienThuc.getIdKienThuc());
+        }
+
+        return khoiKienThucRepository.save(khoiKienThuc);
+    }
+
     public List<KhoiKienThuc> layTatCaKhoiKienThuc() {
         List<KhoiKienThuc> khoiKienThucs = khoiKienThucRepository.findAll();
         return khoiKienThucs.stream()
@@ -126,6 +153,21 @@ public class KhoiKienThucService {
                     .map(id -> kienThucRepository.findById(id)
                             .orElseThrow(() -> new RuntimeException("Kiến thức không tồn tại")))
                     .collect(Collectors.toList());
+            
+            // Load subject information for each knowledge item
+            kienThucs.forEach(kienThuc -> {
+                if (kienThuc.getIdHocPhan() != null && !kienThuc.getIdHocPhan().isEmpty()) {
+                    List<HocPhan> hocPhans = Arrays.stream(kienThuc.getIdHocPhan().split(","))
+                            .map(Integer::parseInt)
+                            .map(id -> hocPhanRepository.findById(id)
+                                    .orElseThrow(() -> new RuntimeException("Học phần không tồn tại")))
+                            .collect(Collectors.toList());
+                    kienThuc.setHocPhans(hocPhans);
+                } else {
+                    kienThuc.setHocPhans(new ArrayList<>());
+                }
+            });
+            
             khoiKienThuc.setDanhSachKienThuc(kienThucs);
         } else {
             khoiKienThuc.setDanhSachKienThuc(new ArrayList<>());

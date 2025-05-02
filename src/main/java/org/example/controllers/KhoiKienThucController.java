@@ -7,6 +7,8 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
+import java.util.Map;
+import java.util.HashMap;
 
 @RestController
 @RequestMapping("/api/khoi-kien-thuc")
@@ -15,79 +17,85 @@ public class KhoiKienThucController {
     private KhoiKienThucService khoiKienThucService;
 
     @PostMapping
-    public ResponseEntity<KhoiKienThuc> themKhoiKienThuc(@RequestBody KhoiKienThuc khoiKienThuc) {
-        try {
-            KhoiKienThuc savedKhoiKienThuc = khoiKienThucService.themKhoiKienThuc(khoiKienThuc);
-            return ResponseEntity.ok(savedKhoiKienThuc);
-        } catch (Exception e) {
-            return ResponseEntity.badRequest().body(null);
+    public ResponseEntity<?> themKhoiKienThuc(@RequestBody KhoiKienThuc khoiKienThuc) {
+        if (khoiKienThuc.getTenKhoiKienThuc() == null || khoiKienThuc.getTenKhoiKienThuc().isEmpty()) {
+            Map<String, String> error = new HashMap<>();
+            error.put("message", "Tên khối kiến thức không được để trống");
+            return ResponseEntity.badRequest().body(error);
         }
+        KhoiKienThuc savedKhoiKienThuc = khoiKienThucService.themKhoiKienThuc(khoiKienThuc);
+        return ResponseEntity.ok(savedKhoiKienThuc);
     }
 
     @PutMapping("/{id}")
-    public ResponseEntity<KhoiKienThuc> capNhatKhoiKienThuc(
+    public ResponseEntity<?> capNhatKhoiKienThuc(
             @PathVariable Integer id,
             @RequestBody KhoiKienThuc khoiKienThuc) {
-        try {
-            khoiKienThuc.setIdKhoiKienThuc(id);
-            KhoiKienThuc updatedKhoiKienThuc = khoiKienThucService.capNhatKhoiKienThuc(khoiKienThuc);
-            return ResponseEntity.ok(updatedKhoiKienThuc);
-        } catch (Exception e) {
-            return ResponseEntity.badRequest().body(null);
+        if (khoiKienThuc.getTenKhoiKienThuc() == null || khoiKienThuc.getTenKhoiKienThuc().isEmpty()) {
+            Map<String, String> error = new HashMap<>();
+            error.put("message", "Tên khối kiến thức không được để trống");
+            return ResponseEntity.badRequest().body(error);
         }
+        khoiKienThuc.setIdKhoiKienThuc(id);
+        KhoiKienThuc updatedKhoiKienThuc = khoiKienThucService.capNhatKhoiKienThuc(khoiKienThuc);
+        return ResponseEntity.ok(updatedKhoiKienThuc);
     }
 
     @DeleteMapping("/{id}")
-    public ResponseEntity<Void> xoaKhoiKienThuc(@PathVariable Integer id) {
-        try {
-            khoiKienThucService.xoaKhoiKienThuc(id);
-            return ResponseEntity.ok().build();
-        } catch (Exception e) {
-            return ResponseEntity.badRequest().build();
-        }
+    public ResponseEntity<?> xoaKhoiKienThuc(@PathVariable Integer id) {
+        khoiKienThucService.xoaKhoiKienThuc(id);
+        return ResponseEntity.ok().build();
     }
 
     @PostMapping("/{idKhoiKienThuc}/kien-thuc/{idKienThuc}")
-    public ResponseEntity<KhoiKienThuc> themKienThucVaoKhoi(
+    public ResponseEntity<?> themKienThucVaoKhoi(
             @PathVariable Integer idKhoiKienThuc,
             @PathVariable Integer idKienThuc) {
-        try {
-            KhoiKienThuc updatedKhoiKienThuc = khoiKienThucService.themKienThucVaoKhoi(idKhoiKienThuc, idKienThuc);
-            return ResponseEntity.ok(updatedKhoiKienThuc);
-        } catch (Exception e) {
-            return ResponseEntity.badRequest().body(null);
-        }
+        KhoiKienThuc updatedKhoiKienThuc = khoiKienThucService.themKienThucVaoKhoi(idKhoiKienThuc, idKienThuc);
+        return ResponseEntity.ok(updatedKhoiKienThuc);
     }
 
     @DeleteMapping("/{idKhoiKienThuc}/kien-thuc/{idKienThuc}")
-    public ResponseEntity<KhoiKienThuc> xoaKienThucKhoiKhoi(
+    public ResponseEntity<?> xoaKienThucKhoiKhoi(
             @PathVariable Integer idKhoiKienThuc,
             @PathVariable Integer idKienThuc) {
-        try {
-            KhoiKienThuc updatedKhoiKienThuc = khoiKienThucService.xoaKienThucKhoiKhoi(idKhoiKienThuc, idKienThuc);
-            return ResponseEntity.ok(updatedKhoiKienThuc);
-        } catch (Exception e) {
-            return ResponseEntity.badRequest().body(null);
-        }
+        KhoiKienThuc updatedKhoiKienThuc = khoiKienThucService.xoaKienThucKhoiKhoi(idKhoiKienThuc, idKienThuc);
+        return ResponseEntity.ok(updatedKhoiKienThuc);
     }
 
     @GetMapping
-    public ResponseEntity<List<KhoiKienThuc>> layTatCaKhoiKienThuc() {
-        try {
-            List<KhoiKienThuc> khoiKienThucs = khoiKienThucService.layTatCaKhoiKienThuc();
-            return ResponseEntity.ok(khoiKienThucs);
-        } catch (Exception e) {
-            return ResponseEntity.badRequest().body(null);
-        }
+    public ResponseEntity<?> layTatCaKhoiKienThuc() {
+        List<KhoiKienThuc> khoiKienThucs = khoiKienThucService.layTatCaKhoiKienThuc();
+        return ResponseEntity.ok(khoiKienThucs);
     }
 
     @GetMapping("/{id}")
-    public ResponseEntity<KhoiKienThuc> layKhoiKienThucById(@PathVariable Integer id) {
-        try {
-            KhoiKienThuc khoiKienThuc = khoiKienThucService.layKhoiKienThucById(id);
-            return ResponseEntity.ok(khoiKienThuc);
-        } catch (Exception e) {
-            return ResponseEntity.badRequest().body(null);
+    public ResponseEntity<?> layKhoiKienThucById(@PathVariable Integer id) {
+        KhoiKienThuc khoiKienThuc = khoiKienThucService.layKhoiKienThucById(id);
+        return ResponseEntity.ok(khoiKienThuc);
+    }
+
+    @PostMapping("/{idKhoiKienThuc}/kien-thuc-moi")
+    public ResponseEntity<?> themKienThucMoiVaoKhoi(
+            @PathVariable Integer idKhoiKienThuc,
+            @RequestBody Map<String, String> request) {
+        String tenKienThuc = request.get("tenKienThuc");
+        String loaiHocPhan = request.get("loaiHocPhan");
+
+        if (tenKienThuc == null || tenKienThuc.isEmpty()) {
+            Map<String, String> error = new HashMap<>();
+            error.put("message", "Tên kiến thức không được để trống");
+            return ResponseEntity.badRequest().body(error);
         }
+
+        if (loaiHocPhan == null || loaiHocPhan.isEmpty()) {
+            Map<String, String> error = new HashMap<>();
+            error.put("message", "Loại học phần không được để trống");
+            return ResponseEntity.badRequest().body(error);
+        }
+
+        KhoiKienThuc updatedKhoiKienThuc = khoiKienThucService.themKienThucMoiVaoKhoi(
+                idKhoiKienThuc, tenKienThuc, loaiHocPhan);
+        return ResponseEntity.ok(updatedKhoiKienThuc);
     }
 } 

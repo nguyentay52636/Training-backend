@@ -8,6 +8,7 @@ import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 import java.util.Map;
+import java.util.HashMap;
 
 @RestController
 @RequestMapping("/api/nguoidung")
@@ -20,36 +21,46 @@ public class NguoiDungController {
     // Đăng ký tài khoản mới
     @PostMapping("/dangky")
     public ResponseEntity<?> dangKy(@RequestBody NguoiDung nguoiDung) {
-        try {
-            NguoiDung newUser = nguoiDungServices.dangKy(nguoiDung);
-            return ResponseEntity.ok(newUser);
-        } catch (RuntimeException e) {
-            return ResponseEntity.badRequest().body(Map.of("error", e.getMessage()));
+        if (nguoiDung.getUserName() == null || nguoiDung.getUserName().isEmpty()) {
+            Map<String, String> error = new HashMap<>();
+            error.put("message", "Tên đăng nhập không được để trống");
+            return ResponseEntity.badRequest().body(error);
         }
+        if (nguoiDung.getPassword() == null || nguoiDung.getPassword().isEmpty()) {
+            Map<String, String> error = new HashMap<>();
+            error.put("message", "Mật khẩu không được để trống");
+            return ResponseEntity.badRequest().body(error);
+        }
+        NguoiDung newUser = nguoiDungServices.dangKy(nguoiDung);
+        return ResponseEntity.ok(newUser);
     }
 
     // Đăng nhập
     @PostMapping("/dangnhap")
     public ResponseEntity<?> dangNhap(@RequestBody Map<String, String> credentials) {
-        try {
-            String userName = credentials.get("userName");
-            String password = credentials.get("password");
-            NguoiDung user = nguoiDungServices.dangNhap(userName, password);
-            return ResponseEntity.ok(user);
-        } catch (RuntimeException e) {
-            return ResponseEntity.status(401).body(Map.of("error", e.getMessage()));
+        String userName = credentials.get("userName");
+        String password = credentials.get("password");
+        
+        if (userName == null || userName.isEmpty()) {
+            Map<String, String> error = new HashMap<>();
+            error.put("message", "Tên đăng nhập không được để trống");
+            return ResponseEntity.badRequest().body(error);
         }
+        if (password == null || password.isEmpty()) {
+            Map<String, String> error = new HashMap<>();
+            error.put("message", "Mật khẩu không được để trống");
+            return ResponseEntity.badRequest().body(error);
+        }
+        
+        NguoiDung user = nguoiDungServices.dangNhap(userName, password);
+        return ResponseEntity.ok(user);
     }
 
     // Lấy thông tin người dùng theo ID
     @GetMapping("/{id}")
     public ResponseEntity<?> layThongTinNguoiDung(@PathVariable("id") int id) {
-        try {
-            NguoiDung user = nguoiDungServices.layThongTinNguoiDung(id);
-            return ResponseEntity.ok(user);
-        } catch (RuntimeException e) {
-            return ResponseEntity.status(404).body(Map.of("error", e.getMessage()));
-        }
+        NguoiDung user = nguoiDungServices.layThongTinNguoiDung(id);
+        return ResponseEntity.ok(user);
     }
 
     // Cập nhật thông tin người dùng
@@ -57,13 +68,14 @@ public class NguoiDungController {
     public ResponseEntity<?> capNhatThongTin(
             @PathVariable("id") int id,
             @RequestBody NguoiDung nguoiDung) {
-        try {
-            nguoiDung.setId(id);
-            NguoiDung updatedUser = nguoiDungServices.capNhatThongTin(nguoiDung);
-            return ResponseEntity.ok(updatedUser);
-        } catch (RuntimeException e) {
-            return ResponseEntity.status(400).body(Map.of("error", e.getMessage()));
+        if (nguoiDung.getUserName() == null || nguoiDung.getUserName().isEmpty()) {
+            Map<String, String> error = new HashMap<>();
+            error.put("message", "Tên đăng nhập không được để trống");
+            return ResponseEntity.badRequest().body(error);
         }
+        nguoiDung.setId(id);
+        NguoiDung updatedUser = nguoiDungServices.capNhatThongTin(nguoiDung);
+        return ResponseEntity.ok(updatedUser);
     }
 
     // Đổi mật khẩu
@@ -71,30 +83,34 @@ public class NguoiDungController {
     public ResponseEntity<?> doiMatKhau(
             @PathVariable("id") int id,
             @RequestBody Map<String, String> passwords) {
-        try {
-            String matKhauCu = passwords.get("matKhauCu");
-            String matKhauMoi = passwords.get("matKhauMoi");
-            NguoiDung updatedUser = nguoiDungServices.doiMatKhau(id, matKhauCu, matKhauMoi);
-            return ResponseEntity.ok(updatedUser);
-        } catch (RuntimeException e) {
-            return ResponseEntity.status(400).body(Map.of("error", e.getMessage()));
+        String matKhauCu = passwords.get("matKhauCu");
+        String matKhauMoi = passwords.get("matKhauMoi");
+        
+        if (matKhauCu == null || matKhauCu.isEmpty()) {
+            Map<String, String> error = new HashMap<>();
+            error.put("message", "Mật khẩu cũ không được để trống");
+            return ResponseEntity.badRequest().body(error);
         }
+        if (matKhauMoi == null || matKhauMoi.isEmpty()) {
+            Map<String, String> error = new HashMap<>();
+            error.put("message", "Mật khẩu mới không được để trống");
+            return ResponseEntity.badRequest().body(error);
+        }
+        
+        NguoiDung updatedUser = nguoiDungServices.doiMatKhau(id, matKhauCu, matKhauMoi);
+        return ResponseEntity.ok(updatedUser);
     }
 
     // Xóa người dùng
     @DeleteMapping("/{id}")
     public ResponseEntity<?> xoaNguoiDung(@PathVariable("id") int id) {
-        try {
-            nguoiDungServices.xoaNguoiDung(id);
-            return ResponseEntity.ok(Map.of("message", "Xóa người dùng thành công"));
-        } catch (RuntimeException e) {
-            return ResponseEntity.status(400).body(Map.of("error", e.getMessage()));
-        }
+        nguoiDungServices.xoaNguoiDung(id);
+        return ResponseEntity.ok(Map.of("message", "Xóa người dùng thành công"));
     }
 
     // Lấy danh sách người dùng
     @GetMapping
-    public ResponseEntity<List<NguoiDung>> layDanhSachNguoiDung() {
+    public ResponseEntity<?> layDanhSachNguoiDung() {
         List<NguoiDung> users = nguoiDungServices.layDanhSachNguoiDung();
         return ResponseEntity.ok(users);
     }
@@ -104,12 +120,18 @@ public class NguoiDungController {
     public ResponseEntity<?> themTaiKhoan(
             @RequestBody NguoiDung nguoiDung,
             @RequestHeader("Admin-Id") int adminId) {
-        try {
-            NguoiDung newUser = nguoiDungServices.themTaiKhoan(nguoiDung, adminId);
-            return ResponseEntity.ok(newUser);
-        } catch (RuntimeException e) {
-            return ResponseEntity.status(400).body(Map.of("error", e.getMessage()));
+        if (nguoiDung.getUserName() == null || nguoiDung.getUserName().isEmpty()) {
+            Map<String, String> error = new HashMap<>();
+            error.put("message", "Tên đăng nhập không được để trống");
+            return ResponseEntity.badRequest().body(error);
         }
+        if (nguoiDung.getPassword() == null || nguoiDung.getPassword().isEmpty()) {
+            Map<String, String> error = new HashMap<>();
+            error.put("message", "Mật khẩu không được để trống");
+            return ResponseEntity.badRequest().body(error);
+        }
+        NguoiDung newUser = nguoiDungServices.themTaiKhoan(nguoiDung, adminId);
+        return ResponseEntity.ok(newUser);
     }
 
     // Cập nhật role người dùng (yêu cầu quyền admin)
@@ -118,18 +140,19 @@ public class NguoiDungController {
             @PathVariable("id") int id,
             @RequestParam int newRole,
             @RequestHeader("Admin-Id") int adminId) {
-        try {
-            NguoiDung updatedUser = nguoiDungServices.capNhatRole(id, newRole, adminId);
-            return ResponseEntity.ok(updatedUser);
-        } catch (RuntimeException e) {
-            return ResponseEntity.status(400).body(Map.of("error", e.getMessage()));
-        }
+        NguoiDung updatedUser = nguoiDungServices.capNhatRole(id, newRole, adminId);
+        return ResponseEntity.ok(updatedUser);
     }
 
     // Tìm kiếm người dùng
     @GetMapping("/timkiem")
-    public ResponseEntity<List<NguoiDung>> timKiemNguoiDung(
+    public ResponseEntity<?> timKiemNguoiDung(
             @RequestParam(required = false) String keyword) {
+        if (keyword == null || keyword.isEmpty()) {
+            Map<String, String> error = new HashMap<>();
+            error.put("message", "Từ khóa tìm kiếm không được để trống");
+            return ResponseEntity.badRequest().body(error);
+        }
         List<NguoiDung> users = nguoiDungServices.timKiem(keyword);
         return ResponseEntity.ok(users);
     }
