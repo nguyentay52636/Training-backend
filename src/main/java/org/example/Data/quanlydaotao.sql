@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Máy chủ: 127.0.0.1
--- Thời gian đã tạo: Th4 25, 2025 lúc 12:01 PM
+-- Thời gian đã tạo: Th5 02, 2025 lúc 03:07 PM
 -- Phiên bản máy phục vụ: 10.4.32-MariaDB
 -- Phiên bản PHP: 8.0.30
 
@@ -143,7 +143,7 @@ CREATE TABLE `ctdt_kehoachdayhoc` (
   `idChuyenNganh` int(11) NOT NULL,
   `tenChuyenNganh` varchar(150) NOT NULL,
   `hocKyThucHien` int(11) NOT NULL,
-  `idHocPhan` varchar(255) NOT NULL
+  `idHocPhan` longtext CHARACTER SET utf8mb4 COLLATE utf8mb4_bin DEFAULT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 --
@@ -151,11 +151,11 @@ CREATE TABLE `ctdt_kehoachdayhoc` (
 --
 
 INSERT INTO `ctdt_kehoachdayhoc` (`idChuyenNganh`, `tenChuyenNganh`, `hocKyThucHien`, `idHocPhan`) VALUES
-(1, 'Khoa học máy tính', 1, ''),
-(2, 'Khoa học máy tính', 1, ''),
-(3, 'Khoa học máy tính', 2, ''),
-(4, 'CNTT', 2, ''),
-(5, 'Công nghệ phần mềm', 3, '');
+(1, 'Khoa học máy tính', 1, '[1, 2, 3]'),
+(2, 'Khoa học máy tính', 1, '[2, 3, 4]'),
+(3, 'Khoa học máy tính', 2, '[3, 4, 5]'),
+(4, 'CNTT', 2, '[4, 5, 1]'),
+(5, 'Công nghệ phần mềm', 3, '[5, 1, 2]');
 
 -- --------------------------------------------------------
 
@@ -189,7 +189,7 @@ INSERT INTO `ctdt_kehoachmonhom` (`id`, `namHoc`, `soNhom`) VALUES
 CREATE TABLE `ctdt_khoikienthuc` (
   `idKhoiKienThuc` int(11) NOT NULL,
   `tenKhoiKienThuc` varchar(150) NOT NULL,
-  `idKienThuc` varchar(255) NOT NULL
+  `idKienThuc` longtext CHARACTER SET utf8mb4 COLLATE utf8mb4_bin DEFAULT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 --
@@ -197,11 +197,11 @@ CREATE TABLE `ctdt_khoikienthuc` (
 --
 
 INSERT INTO `ctdt_khoikienthuc` (`idKhoiKienThuc`, `tenKhoiKienThuc`, `idKienThuc`) VALUES
-(21, 'Toán cơ bản', '1,2,3'),
-(22, 'Lập trình cơ bản', '2,3,4'),
-(23, 'Cơ sở dữ liệu', '3,4,5'),
-(24, 'Mạng máy tính', '4,5,1'),
-(25, 'Chuyên ngành phần mềm', '5,1,2');
+(21, 'Toán cơ bản', '[1,2]'),
+(22, 'Lập trình cơ bản', '[2, 3, 4]'),
+(23, 'Cơ sở dữ liệu', '[3, 4, 5]'),
+(24, 'Mạng máy tính', '[4, 5, 1]'),
+(25, 'Khối kiến thức cơ sở (Cập nhật)', '[1,2,3,4]');
 
 -- --------------------------------------------------------
 
@@ -232,7 +232,7 @@ INSERT INTO `ctdt_khungchuongtrinh` (`id`, `idThongTin`) VALUES
 CREATE TABLE `ctdt_kienthuc` (
   `idKienThuc` int(11) NOT NULL,
   `tenKienThuc` varchar(200) NOT NULL,
-  `idHocPhan` varchar(255) NOT NULL,
+  `idHocPhan` longtext CHARACTER SET utf8mb4 COLLATE utf8mb4_bin NOT NULL CHECK (json_valid(`idHocPhan`)),
   `loaiHocPhan` varchar(255) DEFAULT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
@@ -241,11 +241,11 @@ CREATE TABLE `ctdt_kienthuc` (
 --
 
 INSERT INTO `ctdt_kienthuc` (`idKienThuc`, `tenKienThuc`, `idHocPhan`, `loaiHocPhan`) VALUES
-(1, 'Toán rời rạc', '1,2', '0'),
-(2, 'Lập trình C', '2,3', '0'),
-(3, 'CSDL', '3,4', '0'),
-(4, 'Mạng máy tính', '4,5', '0'),
-(5, 'Phân tích thiết kế hệ thống', '5,1', '0');
+(1, 'Toán rời rạc', '[1, 2]', '0'),
+(2, 'Lập trình C', '[2, 3]', '0'),
+(3, 'CSDL', '[3, 4]', '0'),
+(4, 'Mạng máy tính', '[4, 5]', '0'),
+(5, 'Phân tích thiết kế hệ thống', '[5, 1]', '0');
 
 -- --------------------------------------------------------
 
@@ -372,8 +372,7 @@ ALTER TABLE `ctdt_kehoachmonhom`
 -- Chỉ mục cho bảng `ctdt_khoikienthuc`
 --
 ALTER TABLE `ctdt_khoikienthuc`
-  ADD PRIMARY KEY (`idKhoiKienThuc`),
-  ADD KEY `FK_ctdt_khoikienthuc_ctct_kienthuc` (`idKienThuc`);
+  ADD PRIMARY KEY (`idKhoiKienThuc`);
 
 --
 -- Chỉ mục cho bảng `ctdt_khungchuongtrinh`
@@ -386,8 +385,7 @@ ALTER TABLE `ctdt_khungchuongtrinh`
 -- Chỉ mục cho bảng `ctdt_kienthuc`
 --
 ALTER TABLE `ctdt_kienthuc`
-  ADD PRIMARY KEY (`idKienThuc`),
-  ADD KEY `FK_ctct_kienthuc_ctdt_hocphan` (`idHocPhan`);
+  ADD PRIMARY KEY (`idKienThuc`);
 
 --
 -- Chỉ mục cho bảng `ctdt_phanconggiangday`
@@ -453,7 +451,7 @@ ALTER TABLE `ctdt_kehoachmonhom`
 -- AUTO_INCREMENT cho bảng `ctdt_khoikienthuc`
 --
 ALTER TABLE `ctdt_khoikienthuc`
-  MODIFY `idKhoiKienThuc` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=27;
+  MODIFY `idKhoiKienThuc` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=28;
 
 --
 -- AUTO_INCREMENT cho bảng `ctdt_khungchuongtrinh`

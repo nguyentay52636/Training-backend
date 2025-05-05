@@ -23,16 +23,6 @@ public class KienThucController {
             error.put("message", "Tên kiến thức không được để trống");
             return ResponseEntity.badRequest().body(error);
         }
-        if (kienThuc.getIdHocPhan() == null) {
-            Map<String, String> error = new HashMap<>();
-            error.put("message", "ID học phần không được để trống");
-            return ResponseEntity.badRequest().body(error);
-        }
-        if (kienThuc.getLoaiHocPhan() == null) {
-            Map<String, String> error = new HashMap<>();
-            error.put("message", "Loại học phần không được để trống");
-            return ResponseEntity.badRequest().body(error);
-        }
         KienThuc savedKienThuc = kienThucService.themKienThuc(kienThuc);
         return ResponseEntity.ok(savedKienThuc);
     }
@@ -44,16 +34,6 @@ public class KienThucController {
         if (kienThuc.getTenKienThuc() == null || kienThuc.getTenKienThuc().isEmpty()) {
             Map<String, String> error = new HashMap<>();
             error.put("message", "Tên kiến thức không được để trống");
-            return ResponseEntity.badRequest().body(error);
-        }
-        if (kienThuc.getIdHocPhan() == null) {
-            Map<String, String> error = new HashMap<>();
-            error.put("message", "ID học phần không được để trống");
-            return ResponseEntity.badRequest().body(error);
-        }
-        if (kienThuc.getLoaiHocPhan() == null) {
-            Map<String, String> error = new HashMap<>();
-            error.put("message", "Loại học phần không được để trống");
             return ResponseEntity.badRequest().body(error);
         }
         kienThuc.setIdKienThuc(id);
@@ -84,14 +64,18 @@ public class KienThucController {
     }
 
     @GetMapping
-    public ResponseEntity<?> layTatCaKienThuc() {
-        List<KienThuc> kienThucs = kienThucService.layTatCaKienThuc();
-        return ResponseEntity.ok(kienThucs);
+    public List<KienThuc> layTatCaKienThuc() {
+        return kienThucService.layTatCaKienThuc();
     }
 
     @GetMapping("/{id}")
-    public ResponseEntity<?> layKienThucById(@PathVariable Integer id) {
+    public ResponseEntity<KienThuc> layKienThucById(@PathVariable Integer id) {
         KienThuc kienThuc = kienThucService.layKienThucById(id);
-        return ResponseEntity.ok(kienThuc);
+        return kienThuc != null ? ResponseEntity.ok(kienThuc) : ResponseEntity.notFound().build();
     }
-} 
+
+    @GetMapping("/hoc-phan/{hocPhanId}")
+    public List<KienThuc> getKienThucByHocPhanId(@PathVariable Integer hocPhanId) {
+        return kienThucService.findByHocPhanId(hocPhanId);
+    }
+}

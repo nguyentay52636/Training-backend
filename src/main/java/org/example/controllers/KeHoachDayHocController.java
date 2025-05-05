@@ -25,11 +25,6 @@ public class KeHoachDayHocController {
             error.put("message", "Học kỳ thực hiện không được để trống");
             return ResponseEntity.badRequest().body(error);
         }
-        if (keHoachDayHoc.getIdChuyenNganh() == null) {
-            Map<String, String> error = new HashMap<>();
-            error.put("message", "ID chuyên ngành không được để trống");
-            return ResponseEntity.badRequest().body(error);
-        }
         return ResponseEntity.ok(keHoachDayHocService.themKeHoach(keHoachDayHoc));
     }
 
