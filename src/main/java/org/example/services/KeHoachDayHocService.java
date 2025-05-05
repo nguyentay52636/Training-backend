@@ -8,9 +8,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.ArrayList;
 import java.util.List;
-import java.util.Optional;
 import java.util.stream.Collectors;
 
 @Service
@@ -24,11 +22,7 @@ public class KeHoachDayHocService {
 
     @Transactional
     public KeHoachDayHoc themKeHoach(KeHoachDayHoc keHoachDayHoc) {
-        if (keHoachDayHocRepository.existsByIdChuyenNganh(keHoachDayHoc.getIdChuyenNganh())) {
-            throw new RuntimeException("Kế hoạch dạy học đã tồn tại cho chuyên ngành này");
-        }
-        KeHoachDayHoc savedKeHoach = keHoachDayHocRepository.save(keHoachDayHoc);
-        return populateHocPhanInfo(savedKeHoach);
+        return keHoachDayHocRepository.save(keHoachDayHoc);
     }
 
     @Transactional
@@ -41,8 +35,7 @@ public class KeHoachDayHocService {
         existingKeHoach.setIdHocPhan(keHoachDayHoc.getIdHocPhan());
         existingKeHoach.setHocKyThucHien(keHoachDayHoc.getHocKyThucHien());
         
-        KeHoachDayHoc updatedKeHoach = keHoachDayHocRepository.save(existingKeHoach);
-        return populateHocPhanInfo(updatedKeHoach);
+        return keHoachDayHocRepository.save(existingKeHoach);
     }
 
     @Transactional
@@ -55,76 +48,86 @@ public class KeHoachDayHocService {
 
     public List<KeHoachDayHoc> layTatCaKeHoach() {
         List<KeHoachDayHoc> keHoachList = keHoachDayHocRepository.findAll();
-        return keHoachList.stream()
-                .map(this::populateHocPhanInfo)
+        
+        for (KeHoachDayHoc keHoach : keHoachList) {
+            // Lấy thông tin chi tiết của các HocPhan
+            List<HocPhan> hocPhanList = keHoach.getIdHocPhan().stream()
+                .map(id -> hocPhanRepository.findById(id).orElse(null))
+                .filter(hocPhan -> hocPhan != null)
                 .collect(Collectors.toList());
-    }
-
-    private KeHoachDayHoc populateHocPhanInfo(KeHoachDayHoc keHoach) {
-        List<KeHoachDayHoc.HocPhanInfo> hocPhanInfos = new ArrayList<>();
-        String[] idHocPhans = keHoach.getIdHocPhan().split(",");
-        for (String id : idHocPhans) {
-            try {
-                Integer idHocPhan = Integer.parseInt(id.trim());
-                HocPhan hocPhan = hocPhanRepository.findById(idHocPhan).orElse(null);
-                if (hocPhan != null) {
-                    KeHoachDayHoc.HocPhanInfo info = new KeHoachDayHoc.HocPhanInfo();
-                    info.setIdHocPhan(hocPhan.getIdHocPhan());
-                    info.setMaHP(hocPhan.getMaHP());
-                    info.setTenHP(hocPhan.getTenHP());
-                    info.setSoTinChi(hocPhan.getSoTinChi());
-                    info.setSoTietLyThuyet(hocPhan.getSoTietLyThuyet());
-                    info.setSoTietThucHanh(hocPhan.getSoTietThucHanh());
-                    info.setSoTietThucTap(hocPhan.getSoTietThucTap());
-                    info.setLoaiHocPhan(hocPhan.getLoaiHocPhan());
-                    info.setTongSoTiet(hocPhan.getTongSoTiet());
-                    info.setHeSoHocPhan(hocPhan.getHeSoHocPhan());
-                    hocPhanInfos.add(info);
-                }
-            } catch (NumberFormatException e) {
-                // Bỏ qua nếu không phải số
-            }
+            
+            // Gán danh sách HocPhan vào keHoach
+            keHoach.setHocPhanList(hocPhanList);
         }
-        keHoach.setHocPhans(hocPhanInfos);
-        return keHoach;
+        
+        return keHoachList;
     }
 
     public KeHoachDayHoc layKeHoachTheoId(Integer id) {
         KeHoachDayHoc keHoach = keHoachDayHocRepository.findById(id)
                 .orElseThrow(() -> new RuntimeException("Không tìm thấy kế hoạch dạy học"));
-        return populateHocPhanInfo(keHoach);
+        
+        // Lấy thông tin chi tiết của các HocPhan
+        List<HocPhan> hocPhanList = keHoach.getIdHocPhan().stream()
+            .map(hocPhanId -> hocPhanRepository.findById(hocPhanId).orElse(null))
+            .filter(hocPhan -> hocPhan != null)
+            .collect(Collectors.toList());
+        
+        // Gán danh sách HocPhan vào keHoach
+        keHoach.setHocPhanList(hocPhanList);
+        
+        return keHoach;
     }
 
     public List<KeHoachDayHoc> layKeHoachTheoHocKy(Integer hocKy) {
         List<KeHoachDayHoc> keHoachList = keHoachDayHocRepository.findByHocKyThucHien(hocKy);
-        return keHoachList.stream()
-                .map(this::populateHocPhanInfo)
+        
+        for (KeHoachDayHoc keHoach : keHoachList) {
+            // Lấy thông tin chi tiết của các HocPhan
+            List<HocPhan> hocPhanList = keHoach.getIdHocPhan().stream()
+                .map(id -> hocPhanRepository.findById(id).orElse(null))
+                .filter(hocPhan -> hocPhan != null)
                 .collect(Collectors.toList());
+            
+            // Gán danh sách HocPhan vào keHoach
+            keHoach.setHocPhanList(hocPhanList);
+        }
+        
+        return keHoachList;
     }
 
     public List<KeHoachDayHoc> layKeHoachTheoChuyenNganhVaHocKy(Integer idChuyenNganh, Integer hocKy) {
         List<KeHoachDayHoc> keHoachList = keHoachDayHocRepository.findByIdChuyenNganhAndHocKyThucHien(idChuyenNganh, hocKy);
-        return keHoachList.stream()
-                .map(this::populateHocPhanInfo)
+        
+        for (KeHoachDayHoc keHoach : keHoachList) {
+            // Lấy thông tin chi tiết của các HocPhan
+            List<HocPhan> hocPhanList = keHoach.getIdHocPhan().stream()
+                .map(id -> hocPhanRepository.findById(id).orElse(null))
+                .filter(hocPhan -> hocPhan != null)
                 .collect(Collectors.toList());
+            
+            // Gán danh sách HocPhan vào keHoach
+            keHoach.setHocPhanList(hocPhanList);
+        }
+        
+        return keHoachList;
     }
 
     public List<KeHoachDayHoc> layKeHoachTheoHocPhanVaHocKy(Integer hocPhanId, Integer hocKy) {
-        List<KeHoachDayHoc> keHoachList = keHoachDayHocRepository.findAll().stream()
-                .filter(keHoach -> {
-                    String[] hocPhanIds = keHoach.getIdHocPhan().split(",");
-                    for (String id : hocPhanIds) {
-                        if (id.trim().equals(String.valueOf(hocPhanId))) {
-                            return true;
-                        }
-                    }
-                    return false;
-                })
-                .filter(keHoach -> keHoach.getHocKyThucHien().equals(hocKy))
+        List<KeHoachDayHoc> keHoachList = keHoachDayHocRepository.findByHocPhanIdAndHocKyThucHien(hocPhanId, hocKy);
+        
+        for (KeHoachDayHoc keHoach : keHoachList) {
+            // Lấy thông tin chi tiết của các HocPhan
+            List<HocPhan> hocPhanList = keHoach.getIdHocPhan().stream()
+                .map(id -> hocPhanRepository.findById(id).orElse(null))
+                .filter(hocPhan -> hocPhan != null)
                 .collect(Collectors.toList());
-        return keHoachList.stream()
-                .map(this::populateHocPhanInfo)
-                .collect(Collectors.toList());
+            
+            // Gán danh sách HocPhan vào keHoach
+            keHoach.setHocPhanList(hocPhanList);
+        }
+        
+        return keHoachList;
     }
 
     @Transactional
@@ -132,14 +135,12 @@ public class KeHoachDayHocService {
         KeHoachDayHoc keHoach = keHoachDayHocRepository.findById(idKeHoach)
                 .orElseThrow(() -> new RuntimeException("Không tìm thấy kế hoạch dạy học"));
 
-        String currentHocPhans = keHoach.getIdHocPhan();
-        if (currentHocPhans.isEmpty()) {
-            keHoach.setIdHocPhan(String.valueOf(idHocPhan));
-        } else {
-            keHoach.setIdHocPhan(currentHocPhans + "," + idHocPhan);
+        List<Integer> currentIds = keHoach.getIdHocPhan();
+        if (!currentIds.contains(idHocPhan)) {
+            currentIds.add(idHocPhan);
+            keHoach.setIdHocPhan(currentIds);
+            keHoachDayHocRepository.save(keHoach);
         }
-
-        keHoachDayHocRepository.save(keHoach);
     }
 
     @Transactional
@@ -147,12 +148,9 @@ public class KeHoachDayHocService {
         KeHoachDayHoc keHoach = keHoachDayHocRepository.findById(idKeHoach)
                 .orElseThrow(() -> new RuntimeException("Không tìm thấy kế hoạch dạy học"));
 
-        String[] hocPhanIds = keHoach.getIdHocPhan().split(",");
-        String newHocPhans = java.util.Arrays.stream(hocPhanIds)
-                .filter(id -> !id.trim().equals(String.valueOf(idHocPhan)))
-                .collect(Collectors.joining(","));
-
-        keHoach.setIdHocPhan(newHocPhans);
+        List<Integer> currentIds = keHoach.getIdHocPhan();
+        currentIds.remove(idHocPhan);
+        keHoach.setIdHocPhan(currentIds);
         keHoachDayHocRepository.save(keHoach);
     }
 }

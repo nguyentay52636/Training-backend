@@ -16,8 +16,8 @@ public interface KeHoachDayHocRepository extends JpaRepository<KeHoachDayHoc, In
     
     List<KeHoachDayHoc> findByIdChuyenNganhAndHocKyThucHien(Integer idChuyenNganh, Integer hocKyThucHien);
     
-    @Query("SELECT k FROM KeHoachDayHoc k WHERE k.hocKyThucHien = :hocKy AND k.idHocPhan LIKE %:hocPhanId%")
-    List<KeHoachDayHoc> findByHocPhanIdAndHocKyThucHien(@Param("hocPhanId") String hocPhanId, @Param("hocKy") Integer hocKy);
+    @Query(value = "SELECT * FROM ctdt_kehoachdayhoc WHERE hocKyThucHien = :hocKy AND JSON_CONTAINS(idHocPhan, CAST(:hocPhanId AS JSON), '$') = 1", nativeQuery = true)
+    List<KeHoachDayHoc> findByHocPhanIdAndHocKyThucHien(@Param("hocPhanId") Integer hocPhanId, @Param("hocKy") Integer hocKy);
     
     @Query("SELECT k FROM KeHoachDayHoc k WHERE LOWER(k.tenChuyenNganh) LIKE LOWER(CONCAT('%', :tenChuyenNganh, '%'))")
     List<KeHoachDayHoc> findByTenChuyenNganhContainingIgnoreCase(@Param("tenChuyenNganh") String tenChuyenNganh);

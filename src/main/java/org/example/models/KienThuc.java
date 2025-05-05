@@ -1,13 +1,10 @@
 package org.example.models;
 
-import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
-import jakarta.validation.constraints.NotBlank;
-import jakarta.validation.constraints.Size;
-import lombok.Data;
+import org.example.utils.ListIntegerConverter;
 import java.util.List;
+import java.util.ArrayList;
 
-@Data
 @Entity
 @Table(name = "ctdt_kienthuc")
 public class KienThuc {
@@ -16,28 +13,28 @@ public class KienThuc {
     @Column(name = "idKienThuc")
     private Integer idKienThuc;
 
-    @NotBlank(message = "Tên kiến thức không được để trống")
-    @Size(max = 200)
-    @Column(name = "tenKienThuc")
+    @Column(name = "tenKienThuc", nullable = false, length = 200)
     private String tenKienThuc;
 
-    @NotBlank(message = "ID học phần không được để trống")
-    @Column(name = "idHocPhan")
-    private String idHocPhan;
+    @Column(name = "idHocPhan", nullable = false, columnDefinition = "JSON")
+    @Convert(converter = ListIntegerConverter.class)
+    private List<Integer> idHocPhan = new ArrayList<>();
 
-    @NotBlank(message = "Loại học phần không được để trống")
-    @Column(name = "loaiHocPhan")
+    @Column(name = "loaiHocPhan", length = 255)
     private String loaiHocPhan;
 
     @Transient
-    private List<HocPhan> hocPhans;
+    @OneToMany(fetch = FetchType.EAGER)
+    @JoinColumn(name = "idHocPhan", referencedColumnName = "idHocPhan", insertable = false, updatable = false)
+    private List<HocPhan> hocPhanList = new ArrayList<>();
 
-    public String getIdHocPhan() {
-        return idHocPhan;
+    // Getters and Setters
+    public Integer getIdKienThuc() {
+        return idKienThuc;
     }
 
-    public void setIdHocPhan(String idHocPhan) {
-        this.idHocPhan = idHocPhan;
+    public void setIdKienThuc(Integer idKienThuc) {
+        this.idKienThuc = idKienThuc;
     }
 
     public String getTenKienThuc() {
@@ -48,6 +45,14 @@ public class KienThuc {
         this.tenKienThuc = tenKienThuc;
     }
 
+    public List<Integer> getIdHocPhan() {
+        return idHocPhan;
+    }
+
+    public void setIdHocPhan(List<Integer> idHocPhan) {
+        this.idHocPhan = idHocPhan;
+    }
+
     public String getLoaiHocPhan() {
         return loaiHocPhan;
     }
@@ -56,11 +61,11 @@ public class KienThuc {
         this.loaiHocPhan = loaiHocPhan;
     }
 
-    public List<HocPhan> getHocPhans() {
-        return hocPhans;
+    public List<HocPhan> getHocPhanList() {
+        return hocPhanList;
     }
 
-    public void setHocPhans(List<HocPhan> hocPhans) {
-        this.hocPhans = hocPhans;
+    public void setHocPhanList(List<HocPhan> hocPhanList) {
+        this.hocPhanList = hocPhanList;
     }
 } 

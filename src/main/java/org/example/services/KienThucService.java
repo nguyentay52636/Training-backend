@@ -8,7 +8,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.*;
+import java.util.List;
 import java.util.stream.Collectors;
 
 @Service
@@ -52,77 +52,68 @@ public class KienThucService {
     @Transactional
     public KienThuc themHocPhanVaoKienThuc(Integer idKienThuc, Integer idHocPhan) {
         KienThuc kienThuc = layKienThucById(idKienThuc);
-        HocPhan hocPhan = hocPhanRepository.findById(idHocPhan)
-                .orElseThrow(() -> new IllegalArgumentException("Không tìm thấy học phần với ID: " + idHocPhan));
 
-        String currentIdHocPhan = kienThuc.getIdHocPhan();
-        List<String> currentIds = new ArrayList<>();
-        if (currentIdHocPhan != null && !currentIdHocPhan.trim().isEmpty()) {
-            currentIds.addAll(Arrays.asList(currentIdHocPhan.split(",")));
-        }
-
-        String newIdHocPhan = String.valueOf(idHocPhan);
-        if (currentIds.contains(newIdHocPhan)) {
+        List<Integer> currentIds = kienThuc.getIdHocPhan();
+        if (!currentIds.contains(idHocPhan)) {
+            currentIds.add(idHocPhan);
+            kienThuc.setIdHocPhan(currentIds);
+            return kienThucRepository.save(kienThuc);
+        } else {
             throw new IllegalArgumentException("Học phần đã tồn tại trong kiến thức này");
         }
-
-        currentIds.add(newIdHocPhan);
-        kienThuc.setIdHocPhan(String.join(",", currentIds));
-        return kienThucRepository.save(kienThuc);
     }
 
     @Transactional
     public KienThuc xoaHocPhanKhoiKienThuc(Integer idKienThuc, Integer idHocPhan) {
         KienThuc kienThuc = layKienThucById(idKienThuc);
-        String currentIdHocPhan = kienThuc.getIdHocPhan();
+        List<Integer> currentIds = kienThuc.getIdHocPhan();
         
-        if (currentIdHocPhan == null || currentIdHocPhan.trim().isEmpty()) {
+        if (currentIds.isEmpty()) {
             throw new IllegalArgumentException("Kiến thức này không có học phần nào");
         }
 
-        List<String> currentIds = new ArrayList<>(Arrays.asList(currentIdHocPhan.split(",")));
-        String targetId = String.valueOf(idHocPhan);
-        
-        if (!currentIds.contains(targetId)) {
+        if (!currentIds.remove(idHocPhan)) {
             throw new IllegalArgumentException("Học phần không tồn tại trong kiến thức này");
         }
 
-        currentIds.remove(targetId);
-        kienThuc.setIdHocPhan(String.join(",", currentIds));
+        kienThuc.setIdHocPhan(currentIds);
         return kienThucRepository.save(kienThuc);
     }
 
     public List<KienThuc> layTatCaKienThuc() {
-        List<KienThuc> kienThucs = kienThucRepository.findAll();
-        kienThucs.forEach(this::loadHocPhans);
-        return kienThucs;
+        List<KienThuc> kienThucList = kienThucRepository.findAll();
+        
+        for (KienThuc kienThuc : kienThucList) {
+            // Lấy thông tin chi tiết của các HocPhan
+            List<HocPhan> hocPhanList = kienThuc.getIdHocPhan().stream()
+                .map(id -> hocPhanRepository.findById(id).orElse(null))
+                .filter(hocPhan -> hocPhan != null)
+                .collect(Collectors.toList());
+            
+            // Gán danh sách HocPhan vào kienThuc
+            kienThuc.setHocPhanList(hocPhanList);
+        }
+        
+        return kienThucList;
     }
 
     public KienThuc layKienThucById(Integer id) {
         KienThuc kienThuc = kienThucRepository.findById(id)
                 .orElseThrow(() -> new IllegalArgumentException("Không tìm thấy kiến thức với ID: " + id));
-        loadHocPhans(kienThuc);
+        
+        // Lấy thông tin chi tiết của các HocPhan
+        List<HocPhan> hocPhanList = kienThuc.getIdHocPhan().stream()
+            .map(hocPhanId -> hocPhanRepository.findById(hocPhanId).orElse(null))
+            .filter(hocPhan -> hocPhan != null)
+            .collect(Collectors.toList());
+        
+        // Gán danh sách HocPhan vào kienThuc
+        kienThuc.setHocPhanList(hocPhanList);
+        
         return kienThuc;
     }
 
-    private void loadHocPhans(KienThuc kienThuc) {
-        if (kienThuc.getIdHocPhan() == null || kienThuc.getIdHocPhan().trim().isEmpty()) {
-            kienThuc.setHocPhans(new ArrayList<>());
-            return;
-        }
-
-        List<String> hocPhanIds = Arrays.asList(kienThuc.getIdHocPhan().split(","));
-        List<HocPhan> hocPhans = new ArrayList<>();
-
-        for (String idStr : hocPhanIds) {
-            try {
-                Integer id = Integer.parseInt(idStr.trim());
-                hocPhanRepository.findById(id).ifPresent(hocPhans::add);
-            } catch (NumberFormatException e) {
-                System.out.println("Invalid hoc phan ID: " + idStr);
-            }
-        }
-
-        kienThuc.setHocPhans(hocPhans);
+    public List<KienThuc> findByHocPhanId(Integer hocPhanId) {
+        return kienThucRepository.findByHocPhanId(hocPhanId);
     }
 } 

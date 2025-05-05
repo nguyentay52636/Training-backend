@@ -2,17 +2,18 @@ package org.example.services;
 
 import org.example.models.KhoiKienThuc;
 import org.example.models.KienThuc;
+import org.example.models.HocPhan;
 import org.example.repositories.KhoiKienThucRepository;
 import org.example.repositories.KienThucRepository;
+import org.example.repositories.HocPhanRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
-import java.util.Optional;
 import java.util.stream.Collectors;
+import java.util.Objects;
 
 @Service
 public class KhoiKienThucService {
@@ -21,6 +22,9 @@ public class KhoiKienThucService {
 
     @Autowired
     private KienThucRepository kienThucRepository;
+
+    @Autowired
+    private HocPhanRepository hocPhanRepository;
 
     @Transactional
     public KhoiKienThuc themKhoiKienThuc(KhoiKienThuc khoiKienThuc) {
@@ -54,23 +58,17 @@ public class KhoiKienThucService {
         KhoiKienThuc khoiKienThuc = khoiKienThucRepository.findById(idKhoiKienThuc)
                 .orElseThrow(() -> new RuntimeException("Khối kiến thức không tồn tại"));
         
-        KienThuc kienThuc = kienThucRepository.findById(idKienThuc)
+        kienThucRepository.findById(idKienThuc)
                 .orElseThrow(() -> new RuntimeException("Kiến thức không tồn tại"));
 
-        String currentIds = khoiKienThuc.getIdKienThuc();
-        if (currentIds == null || currentIds.isEmpty()) {
-            khoiKienThuc.setIdKienThuc(String.valueOf(idKienThuc));
+        List<Integer> currentIds = khoiKienThuc.getIdKienThuc();
+        if (!currentIds.contains(idKienThuc)) {
+            currentIds.add(idKienThuc);
+            khoiKienThuc.setIdKienThuc(currentIds);
+            return khoiKienThucRepository.save(khoiKienThuc);
         } else {
-            String[] ids = currentIds.split(",");
-            for (String id : ids) {
-                if (id.equals(String.valueOf(idKienThuc))) {
-                    throw new RuntimeException("Kiến thức đã tồn tại trong khối");
-                }
-            }
-            khoiKienThuc.setIdKienThuc(currentIds + "," + idKienThuc);
+            throw new RuntimeException("Kiến thức đã tồn tại trong khối");
         }
-
-        return khoiKienThucRepository.save(khoiKienThuc);
     }
 
     @Transactional
@@ -78,58 +76,88 @@ public class KhoiKienThucService {
         KhoiKienThuc khoiKienThuc = khoiKienThucRepository.findById(idKhoiKienThuc)
                 .orElseThrow(() -> new RuntimeException("Khối kiến thức không tồn tại"));
         
-        String currentIds = khoiKienThuc.getIdKienThuc();
-        if (currentIds == null || currentIds.isEmpty()) {
+        List<Integer> currentIds = khoiKienThuc.getIdKienThuc();
+        if (currentIds.isEmpty()) {
             throw new RuntimeException("Khối kiến thức không có kiến thức nào");
         }
 
-        String[] ids = currentIds.split(",");
-        StringBuilder newIds = new StringBuilder();
-        boolean found = false;
-
-        for (String id : ids) {
-            if (!id.equals(String.valueOf(idKienThuc))) {
-                if (newIds.length() > 0) {
-                    newIds.append(",");
-                }
-                newIds.append(id);
-            } else {
-                found = true;
-            }
-        }
-
-        if (!found) {
+        if (!currentIds.remove(idKienThuc)) {
             throw new RuntimeException("Kiến thức không tồn tại trong khối");
         }
 
-        khoiKienThuc.setIdKienThuc(newIds.toString());
+        khoiKienThuc.setIdKienThuc(currentIds);
+        return khoiKienThucRepository.save(khoiKienThuc);
+    }
+
+    @Transactional
+    public KhoiKienThuc themKienThucMoiVaoKhoi(Integer idKhoiKienThuc, String tenKienThuc, String loaiHocPhan) {
+        KhoiKienThuc khoiKienThuc = khoiKienThucRepository.findById(idKhoiKienThuc)
+                .orElseThrow(() -> new RuntimeException("Khối kiến thức không tồn tại"));
+
+        KienThuc kienThucMoi = new KienThuc();
+        kienThucMoi.setTenKienThuc(tenKienThuc);
+        kienThucMoi.setLoaiHocPhan(loaiHocPhan);
+        kienThucMoi.setIdHocPhan(new ArrayList<>());
+
+        KienThuc savedKienThuc = kienThucRepository.save(kienThucMoi);
+
+        List<Integer> currentIds = khoiKienThuc.getIdKienThuc();
+        currentIds.add(savedKienThuc.getIdKienThuc());
+        khoiKienThuc.setIdKienThuc(currentIds);
+
         return khoiKienThucRepository.save(khoiKienThuc);
     }
 
     public List<KhoiKienThuc> layTatCaKhoiKienThuc() {
-        List<KhoiKienThuc> khoiKienThucs = khoiKienThucRepository.findAll();
-        return khoiKienThucs.stream()
-                .map(this::layThongTinKienThuc)
+        List<KhoiKienThuc> khoiKienThucList = khoiKienThucRepository.findAll();
+        
+        for (KhoiKienThuc khoiKienThuc : khoiKienThucList) {
+            // Lấy danh sách KienThuc từ idKienThuc
+            List<KienThuc> kienThucList = khoiKienThuc.getIdKienThuc().stream()
+                .map(id -> kienThucRepository.findById(id).orElse(null))
+                .filter(kienThuc -> kienThuc != null)
                 .collect(Collectors.toList());
+            
+            // Với mỗi KienThuc, lấy thông tin chi tiết của các HocPhan
+            for (KienThuc kienThuc : kienThucList) {
+                List<HocPhan> hocPhanList = kienThuc.getIdHocPhan().stream()
+                    .map(id -> hocPhanRepository.findById(id).orElse(null))
+                    .filter(hocPhan -> hocPhan != null)
+                    .collect(Collectors.toList());
+                kienThuc.setHocPhanList(hocPhanList);
+            }
+            
+            // Gán danh sách KienThuc đã có thông tin HocPhan vào khoiKienThuc
+            khoiKienThuc.setKienThucList(kienThucList);
+        }
+        
+        return khoiKienThucList;
     }
 
     public KhoiKienThuc layKhoiKienThucById(Integer id) {
-        KhoiKienThuc khoiKienThuc = khoiKienThucRepository.findById(id)
-                .orElseThrow(() -> new RuntimeException("Khối kiến thức không tồn tại"));
-        return layThongTinKienThuc(khoiKienThuc);
+        KhoiKienThuc khoi = khoiKienThucRepository.findById(id)
+            .orElseThrow(() -> new IllegalArgumentException("Không tìm thấy khối kiến thức với ID: " + id));
+
+        // Lấy danh sách chi tiết các kiến thức
+        List<KienThuc> kienThucList = khoi.getIdKienThuc().stream()
+            .map(kienThucId -> kienThucRepository.findById(kienThucId).orElse(null))
+            .filter(Objects::nonNull)
+            .collect(Collectors.toList());
+
+        // Gán danh sách học phần cho từng kiến thức
+        for (KienThuc kienThuc : kienThucList) {
+            List<HocPhan> hocPhanList = kienThuc.getIdHocPhan().stream()
+                .map(hocPhanId -> hocPhanRepository.findById(hocPhanId).orElse(null))
+                .filter(Objects::nonNull)
+                .collect(Collectors.toList());
+            kienThuc.setHocPhanList(hocPhanList);
+        }
+
+        khoi.setKienThucList(kienThucList);
+        return khoi;
     }
 
-    private KhoiKienThuc layThongTinKienThuc(KhoiKienThuc khoiKienThuc) {
-        if (khoiKienThuc.getIdKienThuc() != null && !khoiKienThuc.getIdKienThuc().isEmpty()) {
-            List<KienThuc> kienThucs = Arrays.stream(khoiKienThuc.getIdKienThuc().split(","))
-                    .map(Integer::parseInt)
-                    .map(id -> kienThucRepository.findById(id)
-                            .orElseThrow(() -> new RuntimeException("Kiến thức không tồn tại")))
-                    .collect(Collectors.toList());
-            khoiKienThuc.setDanhSachKienThuc(kienThucs);
-        } else {
-            khoiKienThuc.setDanhSachKienThuc(new ArrayList<>());
-        }
-        return khoiKienThuc;
+    public List<KhoiKienThuc> findByKienThucId(Integer kienThucId) {
+        return khoiKienThucRepository.findByKienThucId(kienThucId);
     }
 }
