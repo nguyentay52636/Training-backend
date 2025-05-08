@@ -12,12 +12,11 @@ public interface KeHoachDayHocRepository extends JpaRepository<KeHoachDayHoc, In
     
     boolean existsByIdChuyenNganh(Integer idChuyenNganh);
     
-    List<KeHoachDayHoc> findByHocKyThucHien(Integer hocKyThucHien);
+    @Query(value = "SELECT * FROM ctdt_kehoachdayhoc WHERE JSON_CONTAINS(idHocKy, CAST(:hocKy AS JSON), '$') = 1", nativeQuery = true)
+    List<KeHoachDayHoc> findByHocKy(@Param("hocKy") Integer hocKy);
     
-    List<KeHoachDayHoc> findByIdChuyenNganhAndHocKyThucHien(Integer idChuyenNganh, Integer hocKyThucHien);
-    
-    @Query(value = "SELECT * FROM ctdt_kehoachdayhoc WHERE hocKyThucHien = :hocKy AND JSON_CONTAINS(idHocPhan, CAST(:hocPhanId AS JSON), '$') = 1", nativeQuery = true)
-    List<KeHoachDayHoc> findByHocPhanIdAndHocKyThucHien(@Param("hocPhanId") Integer hocPhanId, @Param("hocKy") Integer hocKy);
+    @Query(value = "SELECT * FROM ctdt_kehoachdayhoc WHERE idChuyenNganh = :idChuyenNganh AND JSON_CONTAINS(idHocKy, CAST(:hocKy AS JSON), '$') = 1", nativeQuery = true)
+    List<KeHoachDayHoc> findByIdChuyenNganhAndHocKy(@Param("idChuyenNganh") Integer idChuyenNganh, @Param("hocKy") Integer hocKy);
     
     @Query("SELECT k FROM KeHoachDayHoc k WHERE LOWER(k.tenChuyenNganh) LIKE LOWER(CONCAT('%', :tenChuyenNganh, '%'))")
     List<KeHoachDayHoc> findByTenChuyenNganhContainingIgnoreCase(@Param("tenChuyenNganh") String tenChuyenNganh);
