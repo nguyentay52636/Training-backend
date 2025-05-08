@@ -23,13 +23,9 @@ public class KeHoachDayHoc {
     @Column(name = "tenChuyenNganh", nullable = false, length = 150)
     private String tenChuyenNganh;
 
-    @NotNull(message = "Học kỳ thực hiện không được để trống")
-    @Column(name = "hocKyThucHien", nullable = false)
-    private Integer hocKyThucHien;
-
-    @Column(name = "idHocPhan", nullable = false, columnDefinition = "JSON")
+    @Column(name = "idHocKy", nullable = false, columnDefinition = "JSON")
     @Convert(converter = ListIntegerConverter.class)
-    private List<Integer> idHocPhan = new ArrayList<>();
+    private List<Integer> idHocKy = new ArrayList<>();
 
     @Transient
     private List<HocPhan> hocPhanList = new ArrayList<>();
@@ -51,20 +47,12 @@ public class KeHoachDayHoc {
         this.tenChuyenNganh = tenChuyenNganh;
     }
 
-    public Integer getHocKyThucHien() {
-        return hocKyThucHien;
+    public List<Integer> getIdHocKy() {
+        return idHocKy;
     }
 
-    public void setHocKyThucHien(Integer hocKyThucHien) {
-        this.hocKyThucHien = hocKyThucHien;
-    }
-
-    public List<Integer> getIdHocPhan() {
-        return idHocPhan;
-    }
-
-    public void setIdHocPhan(List<Integer> idHocPhan) {
-        this.idHocPhan = idHocPhan;
+    public void setIdHocKy(List<Integer> idHocKy) {
+        this.idHocKy = idHocKy;
     }
 
     public List<HocPhan> getHocPhanList() {

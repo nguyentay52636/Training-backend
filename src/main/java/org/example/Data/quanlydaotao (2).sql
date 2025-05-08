@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Máy chủ: 127.0.0.1
--- Thời gian đã tạo: Th5 02, 2025 lúc 03:07 PM
+-- Thời gian đã tạo: Th5 08, 2025 lúc 04:29 PM
 -- Phiên bản máy phục vụ: 10.4.32-MariaDB
 -- Phiên bản PHP: 8.0.30
 
@@ -106,6 +106,29 @@ INSERT INTO `ctdt_giangvien` (`idGiangVien`, `idTaiKhoan`, `maGiangVien`, `tenGi
 -- --------------------------------------------------------
 
 --
+-- Cấu trúc bảng cho bảng `ctdt_hocky`
+--
+
+CREATE TABLE `ctdt_hocky` (
+  `idHocKy` int(11) NOT NULL,
+  `idHocPhan` longtext CHARACTER SET utf8mb4 COLLATE utf8mb4_bin DEFAULT NULL CHECK (json_valid(`idHocPhan`))
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+--
+-- Đang đổ dữ liệu cho bảng `ctdt_hocky`
+--
+
+INSERT INTO `ctdt_hocky` (`idHocKy`, `idHocPhan`) VALUES
+(1, '[1,2,3]'),
+(2, '[3,4,5]'),
+(3, '[2,4,5]'),
+(4, '[2,4,5]'),
+(5, '[1,2,4]'),
+(8, '[1,2,3]');
+
+-- --------------------------------------------------------
+
+--
 -- Cấu trúc bảng cho bảng `ctdt_hocphan`
 --
 
@@ -142,20 +165,20 @@ INSERT INTO `ctdt_hocphan` (`idHocPhan`, `maHP`, `tenHP`, `soTinChi`, `soTietLyT
 CREATE TABLE `ctdt_kehoachdayhoc` (
   `idChuyenNganh` int(11) NOT NULL,
   `tenChuyenNganh` varchar(150) NOT NULL,
-  `hocKyThucHien` int(11) NOT NULL,
-  `idHocPhan` longtext CHARACTER SET utf8mb4 COLLATE utf8mb4_bin DEFAULT NULL
+  `idHocKy` longtext CHARACTER SET utf8mb4 COLLATE utf8mb4_bin NOT NULL CHECK (json_valid(`idHocKy`))
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 --
 -- Đang đổ dữ liệu cho bảng `ctdt_kehoachdayhoc`
 --
 
-INSERT INTO `ctdt_kehoachdayhoc` (`idChuyenNganh`, `tenChuyenNganh`, `hocKyThucHien`, `idHocPhan`) VALUES
-(1, 'Khoa học máy tính', 1, '[1, 2, 3]'),
-(2, 'Khoa học máy tính', 1, '[2, 3, 4]'),
-(3, 'Khoa học máy tính', 2, '[3, 4, 5]'),
-(4, 'CNTT', 2, '[4, 5, 1]'),
-(5, 'Công nghệ phần mềm', 3, '[5, 1, 2]');
+INSERT INTO `ctdt_kehoachdayhoc` (`idChuyenNganh`, `tenChuyenNganh`, `idHocKy`) VALUES
+(1, 'Tên chuyên ngành mới', '[1,2,3,4]'),
+(2, 'Khoa học máy tính', '[2,3,4]'),
+(3, 'Khoa học máy tính', '[3,4,5]'),
+(4, 'CNTT', '[2,3]'),
+(5, 'Công nghệ phần mềm', '[3,5]'),
+(7, 'Tên chuyên ngành', '[1,2,3,4,5]');
 
 -- --------------------------------------------------------
 
@@ -197,7 +220,7 @@ CREATE TABLE `ctdt_khoikienthuc` (
 --
 
 INSERT INTO `ctdt_khoikienthuc` (`idKhoiKienThuc`, `tenKhoiKienThuc`, `idKienThuc`) VALUES
-(21, 'Toán cơ bản', '[1,2]'),
+(21, 'Khối kiến thức cơ sở (Cập nhật)', '[1,2,3,4]'),
 (22, 'Lập trình cơ bản', '[2, 3, 4]'),
 (23, 'Cơ sở dữ liệu', '[3, 4, 5]'),
 (24, 'Mạng máy tính', '[4, 5, 1]'),
@@ -351,6 +374,12 @@ ALTER TABLE `ctdt_giangvien`
   ADD KEY `FK_ctdt_giangvien_ctdt_user` (`idTaiKhoan`);
 
 --
+-- Chỉ mục cho bảng `ctdt_hocky`
+--
+ALTER TABLE `ctdt_hocky`
+  ADD PRIMARY KEY (`idHocKy`);
+
+--
 -- Chỉ mục cho bảng `ctdt_hocphan`
 --
 ALTER TABLE `ctdt_hocphan`
@@ -430,6 +459,12 @@ ALTER TABLE `ctdt_giangvien`
   MODIFY `idGiangVien` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=40;
 
 --
+-- AUTO_INCREMENT cho bảng `ctdt_hocky`
+--
+ALTER TABLE `ctdt_hocky`
+  MODIFY `idHocKy` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=9;
+
+--
 -- AUTO_INCREMENT cho bảng `ctdt_hocphan`
 --
 ALTER TABLE `ctdt_hocphan`
@@ -439,7 +474,7 @@ ALTER TABLE `ctdt_hocphan`
 -- AUTO_INCREMENT cho bảng `ctdt_kehoachdayhoc`
 --
 ALTER TABLE `ctdt_kehoachdayhoc`
-  MODIFY `idChuyenNganh` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=6;
+  MODIFY `idChuyenNganh` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=9;
 
 --
 -- AUTO_INCREMENT cho bảng `ctdt_kehoachmonhom`

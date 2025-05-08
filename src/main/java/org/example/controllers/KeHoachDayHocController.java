@@ -8,7 +8,6 @@ import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 import java.util.Map;
-import java.util.HashMap;
 
 @RestController
 @RequestMapping("/api/kehoachdayhoc")
@@ -18,101 +17,76 @@ public class KeHoachDayHocController {
     @Autowired
     private KeHoachDayHocService keHoachDayHocService;
 
-    @PostMapping
-    public ResponseEntity<?> themKeHoach(@RequestBody KeHoachDayHoc keHoachDayHoc) {
-        if (keHoachDayHoc.getHocKyThucHien() == null) {
-            Map<String, String> error = new HashMap<>();
-            error.put("message", "Học kỳ thực hiện không được để trống");
-            return ResponseEntity.badRequest().body(error);
-        }
-        return ResponseEntity.ok(keHoachDayHocService.themKeHoach(keHoachDayHoc));
-    }
-
-    @PutMapping("/{id}")
-    public ResponseEntity<?> capNhatKeHoach(@PathVariable Integer id, @RequestBody KeHoachDayHoc keHoachDayHoc) {
-        if (keHoachDayHoc.getHocKyThucHien() == null) {
-            Map<String, String> error = new HashMap<>();
-            error.put("message", "Học kỳ thực hiện không được để trống");
-            return ResponseEntity.badRequest().body(error);
-        }
-        if (keHoachDayHoc.getIdChuyenNganh() == null) {
-            Map<String, String> error = new HashMap<>();
-            error.put("message", "ID chuyên ngành không được để trống");
-            return ResponseEntity.badRequest().body(error);
-        }
-        return ResponseEntity.ok(keHoachDayHocService.capNhatKeHoach(id, keHoachDayHoc));
-    }
-
-    @DeleteMapping("/{id}")
-    public ResponseEntity<?> xoaKeHoach(@PathVariable Integer id) {
-        keHoachDayHocService.xoaKeHoach(id);
-        return ResponseEntity.ok().build();
-    }
-
+    // Lấy tất cả kế hoạch dạy học
     @GetMapping
-    public ResponseEntity<?> layTatCaKeHoach() {
-        List<KeHoachDayHoc> keHoachList = keHoachDayHocService.layTatCaKeHoach();
-        return ResponseEntity.ok(keHoachList);
+    public ResponseEntity<List<KeHoachDayHoc>> layTatCaKeHoach() {
+        return ResponseEntity.ok(keHoachDayHocService.layTatCaKeHoach());
     }
 
+    // Lấy kế hoạch dạy học theo ID
     @GetMapping("/{id}")
-    public ResponseEntity<?> layKeHoachTheoId(@PathVariable Integer id) {
+    public ResponseEntity<KeHoachDayHoc> layKeHoachTheoId(@PathVariable Integer id) {
         return ResponseEntity.ok(keHoachDayHocService.layKeHoachTheoId(id));
     }
 
-    @GetMapping("/hocky/{hocKy}")
-    public ResponseEntity<?> layKeHoachTheoHocKy(@PathVariable Integer hocKy) {
-        if (hocKy == null) {
-            Map<String, String> error = new HashMap<>();
-            error.put("message", "Học kỳ không được để trống");
-            return ResponseEntity.badRequest().body(error);
+    // Thêm kế hoạch dạy học mới
+    @PostMapping
+    public ResponseEntity<?> themKeHoach(@RequestBody KeHoachDayHoc keHoachDayHoc) {
+        try {
+            if (keHoachDayHoc.getTenChuyenNganh() == null || keHoachDayHoc.getTenChuyenNganh().trim().isEmpty()) {
+                return ResponseEntity.badRequest().body(Map.of("message", "Tên chuyên ngành không được để trống"));
+            }
+            if (keHoachDayHoc.getIdHocKy() == null || keHoachDayHoc.getIdHocKy().isEmpty()) {
+                return ResponseEntity.badRequest().body(Map.of("message", "Danh sách học kỳ không được để trống"));
+            }
+            return ResponseEntity.ok(keHoachDayHocService.themKeHoach(keHoachDayHoc));
+        } catch (RuntimeException e) {
+            return ResponseEntity.badRequest().body(Map.of("message", e.getMessage()));
         }
-        return ResponseEntity.ok(keHoachDayHocService.layKeHoachTheoHocKy(hocKy));
     }
 
-    @GetMapping("/chuyennganh/{idChuyenNganh}/hocky/{hocKy}")
-    public ResponseEntity<?> layKeHoachTheoChuyenNganhVaHocKy(
-            @PathVariable Integer idChuyenNganh,
-            @PathVariable Integer hocKy) {
-        if (idChuyenNganh == null || hocKy == null) {
-            Map<String, String> error = new HashMap<>();
-            error.put("message", "ID chuyên ngành và học kỳ không được để trống");
-            return ResponseEntity.badRequest().body(error);
-        }
-        return ResponseEntity.ok(keHoachDayHocService.layKeHoachTheoChuyenNganhVaHocKy(idChuyenNganh, hocKy));
-    }
-
-    @GetMapping("/hocphan/{hocPhanId}/hocky/{hocKy}")
-    public ResponseEntity<?> layKeHoachTheoHocPhanVaHocKy(
-            @PathVariable Integer hocPhanId,
-            @PathVariable Integer hocKy) {
-        if (hocPhanId == null || hocKy == null) {
-            Map<String, String> error = new HashMap<>();
-            error.put("message", "ID học phần và học kỳ không được để trống");
-            return ResponseEntity.badRequest().body(error);
-        }
-        return ResponseEntity.ok(keHoachDayHocService.layKeHoachTheoHocPhanVaHocKy(hocPhanId, hocKy));
-    }
-
-    @PostMapping("/{id}/hocphan")
-    public ResponseEntity<?> themHocPhanVaoKeHoach(
+    // Cập nhật kế hoạch dạy học
+    @PutMapping("/{id}")
+    public ResponseEntity<KeHoachDayHoc> capNhatKeHoach(
             @PathVariable Integer id,
-            @RequestBody Map<String, Integer> request) {
-        Integer idHocPhan = request.get("idHocPhan");
-        if (idHocPhan == null) {
-            Map<String, String> error = new HashMap<>();
-            error.put("message", "ID học phần không được để trống");
-            return ResponseEntity.badRequest().body(error);
-        }
-        keHoachDayHocService.themHocPhanVaoKeHoach(id, idHocPhan);
-        return ResponseEntity.ok().build();
+            @RequestBody KeHoachDayHoc keHoachDayHoc) {
+        return ResponseEntity.ok(keHoachDayHocService.capNhatKeHoach(id, keHoachDayHoc));
     }
 
-    @DeleteMapping("/{id}/hocphan/{idHocPhan}")
-    public ResponseEntity<?> xoaHocPhanKhoiKeHoach(
-            @PathVariable Integer id,
-            @PathVariable Integer idHocPhan) {
-        keHoachDayHocService.xoaHocPhanKhoiKeHoach(id, idHocPhan);
-        return ResponseEntity.ok().build();
+    // Xóa kế hoạch dạy học
+    @DeleteMapping("/{id}")
+    public ResponseEntity<?> xoaKeHoach(@PathVariable Integer id) {
+        try {
+            keHoachDayHocService.xoaKeHoach(id);
+            return ResponseEntity.ok(Map.of("message", "Xóa kế hoạch dạy học thành công"));
+        } catch (RuntimeException e) {
+            return ResponseEntity.badRequest().body(Map.of("message", e.getMessage()));
+        }
+    }
+
+    // Thêm học kỳ vào kế hoạch dạy học
+    @PostMapping("/{idKeHoach}/hocky/{idHocKy}")
+    public ResponseEntity<?> themHocKyVaoKeHoach(
+            @PathVariable Integer idKeHoach,
+            @PathVariable Integer idHocKy) {
+        try {
+            keHoachDayHocService.themHocKyVaoKeHoach(idKeHoach, idHocKy);
+            return ResponseEntity.ok(Map.of("message", "Thêm học kỳ vào kế hoạch dạy học thành công"));
+        } catch (RuntimeException e) {
+            return ResponseEntity.badRequest().body(Map.of("message", e.getMessage()));
+        }
+    }
+
+    // Xóa học kỳ khỏi kế hoạch dạy học
+    @DeleteMapping("/{idKeHoach}/hocky/{idHocKy}")
+    public ResponseEntity<?> xoaHocKyKhoiKeHoach(
+            @PathVariable Integer idKeHoach,
+            @PathVariable Integer idHocKy) {
+        try {
+            keHoachDayHocService.xoaHocKyKhoiKeHoach(idKeHoach, idHocKy);
+            return ResponseEntity.ok(Map.of("message", "Xóa học kỳ khỏi kế hoạch dạy học thành công"));
+        } catch (RuntimeException e) {
+            return ResponseEntity.badRequest().body(Map.of("message", e.getMessage()));
+        }
     }
 }
