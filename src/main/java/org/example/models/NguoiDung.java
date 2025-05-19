@@ -30,18 +30,18 @@ public class NguoiDung {
     @Column(name = "password", length = 150)
     private String password;
 
-    @Column(name = "role", columnDefinition = "int COMMENT '0:User, 1: Giang vien, 2: Admin'")
-    private Integer role = 0; // Default: 0 (User)
+    @Column(name = "role", columnDefinition = "int COMMENT '1: Giang vien, 2: Admin'")
+    private Integer role;
 
     // Constructors
     public NguoiDung() {
     }
 
-    public NguoiDung(String userName, String userEmail, String password) {
+    public NguoiDung(String userName, String userEmail, String password, Integer role) {
         this.userName = userName;
         this.userEmail = userEmail;
         this.password = password;
-        this.role = 0;
+        this.role = role;
     }
 
     // Getters and Setters
@@ -92,9 +92,5 @@ public class NguoiDung {
 
     public boolean isGiangVien() {
         return role != null && role == 1;
-    }
-
-    public boolean isUser() {
-        return role == null || role == 0;
     }
 }
