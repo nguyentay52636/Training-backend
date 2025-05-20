@@ -48,6 +48,14 @@ public class KhungChuongTrinhService {
         if (!khungChuongTrinhRepository.existsById(id)) {
             throw new IllegalArgumentException("Không tìm thấy khung chương trình với ID: " + id);
         }
+        
+        KhungChuongTrinh khungChuongTrinh = khungChuongTrinhRepository.findById(id)
+            .orElseThrow(() -> new IllegalArgumentException("Không tìm thấy khung chương trình với ID: " + id));
+            
+        if (khungChuongTrinh.getIdThongTin() != null && thongTinChungRepository.existsById(khungChuongTrinh.getIdThongTin())) {
+            throw new IllegalArgumentException("Vui lòng xóa thông tin chung trước khi xóa khung chương trình");
+        }
+        
         khungChuongTrinhRepository.deleteById(id);
     }
 
