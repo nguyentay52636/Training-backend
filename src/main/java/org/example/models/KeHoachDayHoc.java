@@ -23,12 +23,12 @@ public class KeHoachDayHoc {
     @Column(name = "tenChuyenNganh", nullable = false, length = 150)
     private String tenChuyenNganh;
 
-    @Column(name = "idHocKy", nullable = false, columnDefinition = "JSON")
+    @Column(name = "idHocKy", nullable = false, columnDefinition = "longtext CHARACTER SET utf8mb4 COLLATE utf8mb4_bin")
     @Convert(converter = ListIntegerConverter.class)
     private List<Integer> idHocKy = new ArrayList<>();
 
     @Transient
-    private List<HocPhan> hocPhanList = new ArrayList<>();
+    private List<HocKy> hocKyList = new ArrayList<>();
 
     // Getters and Setters
     public Integer getIdChuyenNganh() {
@@ -55,11 +55,11 @@ public class KeHoachDayHoc {
         this.idHocKy = idHocKy;
     }
 
-    public List<HocPhan> getHocPhanList() {
-        return hocPhanList;
+    public List<HocKy> getHocKyList() {
+        return hocKyList;
     }
 
-    public void setHocPhanList(List<HocPhan> hocPhanList) {
-        this.hocPhanList = hocPhanList;
+    public void setHocKyList(List<HocKy> hocKyList) {
+        this.hocKyList = hocKyList;
     }
 } 

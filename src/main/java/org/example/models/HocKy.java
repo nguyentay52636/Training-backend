@@ -10,10 +10,13 @@ import java.util.ArrayList;
 public class HocKy {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @Column(name = "idHocKy")
+    @Column(name = "idHocKy", columnDefinition = "int")
     private Integer idHocKy;
 
-    @Column(name = "idHocPhan", nullable = false, columnDefinition = "JSON")
+    @Column(name = "tenHocKy", nullable = false, length = 255, columnDefinition = "varchar(255)")
+    private String tenHocKy;
+
+    @Column(name = "idHocPhan", columnDefinition = "longtext CHARACTER SET utf8mb4 COLLATE utf8mb4_bin")
     @Convert(converter = ListIntegerConverter.class)
     private List<Integer> idHocPhan = new ArrayList<>();
 
@@ -29,12 +32,20 @@ public class HocKy {
         this.idHocKy = idHocKy;
     }
 
+    public String getTenHocKy() {
+        return tenHocKy;
+    }
+
+    public void setTenHocKy(String tenHocKy) {
+        this.tenHocKy = tenHocKy != null ? tenHocKy.trim() : null;
+    }
+
     public List<Integer> getIdHocPhan() {
         return idHocPhan;
     }
 
     public void setIdHocPhan(List<Integer> idHocPhan) {
-        this.idHocPhan = idHocPhan;
+        this.idHocPhan = idHocPhan != null ? idHocPhan : new ArrayList<>();
     }
 
     public List<HocPhan> getHocPhanList() {
@@ -43,5 +54,14 @@ public class HocKy {
 
     public void setHocPhanList(List<HocPhan> hocPhanList) {
         this.hocPhanList = hocPhanList;
+    }
+
+    @Override
+    public String toString() {
+        return "HocKy{" +
+                "idHocKy=" + idHocKy +
+                ", tenHocKy='" + tenHocKy + '\'' +
+                ", idHocPhan=" + idHocPhan +
+                '}';
     }
 } 
