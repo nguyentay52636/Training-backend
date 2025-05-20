@@ -15,12 +15,7 @@ public class KeHoachMoNhomService {
 
     @Transactional
     public KeHoachMoNhom themKeHoachMoNhom(KeHoachMoNhom keHoachMoNhom) {
-        if (keHoachMoNhom.getNamHoc() == null || keHoachMoNhom.getNamHoc().trim().isEmpty()) {
-            throw new IllegalArgumentException("Năm học không được để trống");
-        }
-        if (keHoachMoNhom.getSoNhom() == null) {
-            throw new IllegalArgumentException("Số nhóm không được để trống");
-        }
+        validateKeHoachMoNhom(keHoachMoNhom);
         return keHoachMoNhomRepository.save(keHoachMoNhom);
     }
 
@@ -32,13 +27,26 @@ public class KeHoachMoNhomService {
         if (!keHoachMoNhomRepository.existsById(keHoachMoNhom.getId())) {
             throw new IllegalArgumentException("Không tìm thấy kế hoạch mở nhóm với ID: " + keHoachMoNhom.getId());
         }
+        validateKeHoachMoNhom(keHoachMoNhom);
+        return keHoachMoNhomRepository.save(keHoachMoNhom);
+    }
+
+    private void validateKeHoachMoNhom(KeHoachMoNhom keHoachMoNhom) {
         if (keHoachMoNhom.getNamHoc() == null || keHoachMoNhom.getNamHoc().trim().isEmpty()) {
             throw new IllegalArgumentException("Năm học không được để trống");
         }
         if (keHoachMoNhom.getSoNhom() == null) {
             throw new IllegalArgumentException("Số nhóm không được để trống");
         }
-        return keHoachMoNhomRepository.save(keHoachMoNhom);
+        if (keHoachMoNhom.getIdHocPhan() == null) {
+            throw new IllegalArgumentException("ID học phần không được để trống");
+        }
+        if (keHoachMoNhom.getHocKy() == null) {
+            throw new IllegalArgumentException("Học kỳ không được để trống");
+        }
+        if (keHoachMoNhom.getSoLuongSinhVien() == null) {
+            throw new IllegalArgumentException("Số lượng sinh viên không được để trống");
+        }
     }
 
     @Transactional
