@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Máy chủ: 127.0.0.1
--- Thời gian đã tạo: Th5 08, 2025 lúc 04:29 PM
+-- Thời gian đã tạo: Th5 20, 2025 lúc 10:11 AM
 -- Phiên bản máy phục vụ: 10.4.32-MariaDB
 -- Phiên bản PHP: 8.0.30
 
@@ -111,6 +111,7 @@ INSERT INTO `ctdt_giangvien` (`idGiangVien`, `idTaiKhoan`, `maGiangVien`, `tenGi
 
 CREATE TABLE `ctdt_hocky` (
   `idHocKy` int(11) NOT NULL,
+  `tenHocKy` varchar(255) NOT NULL,
   `idHocPhan` longtext CHARACTER SET utf8mb4 COLLATE utf8mb4_bin DEFAULT NULL CHECK (json_valid(`idHocPhan`))
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
@@ -118,13 +119,12 @@ CREATE TABLE `ctdt_hocky` (
 -- Đang đổ dữ liệu cho bảng `ctdt_hocky`
 --
 
-INSERT INTO `ctdt_hocky` (`idHocKy`, `idHocPhan`) VALUES
-(1, '[1,2,3]'),
-(2, '[3,4,5]'),
-(3, '[2,4,5]'),
-(4, '[2,4,5]'),
-(5, '[1,2,4]'),
-(8, '[1,2,3]');
+INSERT INTO `ctdt_hocky` (`idHocKy`, `tenHocKy`, `idHocPhan`) VALUES
+(1, 'Học kỳ 1', '[1,2,3]'),
+(2, 'Học kỳ 2', '[3,4,5]'),
+(3, 'Học kỳ 3', '[2,4,5]'),
+(4, 'Học kỳ 4', '[2,4,5]'),
+(5, 'Học kỳ 5', '[1,2,4]');
 
 -- --------------------------------------------------------
 

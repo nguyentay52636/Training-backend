@@ -34,42 +34,51 @@ public class HocKyController {
 
     // Thêm học kỳ mới
     @PostMapping
-    public ResponseEntity<HocKy> themHocKyMoi(@RequestBody Map<String, List<Integer>> request) {
+    public ResponseEntity<?> themHocKyMoi(@RequestBody Map<String, Object> request) {
         try {
-            List<Integer> danhSachHocPhan = request.get("idHocPhan");
+            String tenHocKy = (String) request.get("tenHocKy");
+            if (tenHocKy == null || tenHocKy.trim().isEmpty()) {
+                return ResponseEntity.badRequest().body(Map.of("message", "Tên học kỳ không được để trống"));
+            }
+
+            @SuppressWarnings("unchecked")
+            List<Integer> danhSachHocPhan = (List<Integer>) request.get("idHocPhan");
             if (danhSachHocPhan == null) {
                 danhSachHocPhan = new ArrayList<>();
             }
-            HocKy hocKy = hocKyService.themHocKyMoi(danhSachHocPhan);
+
+            HocKy hocKy = hocKyService.themHocKyMoi(tenHocKy, danhSachHocPhan);
             return ResponseEntity.ok(hocKy);
+        } catch (ClassCastException e) {
+            return ResponseEntity.badRequest().body(Map.of("message", "Định dạng dữ liệu không hợp lệ"));
         } catch (RuntimeException e) {
-            return ResponseEntity.badRequest().build();
+            return ResponseEntity.badRequest().body(Map.of("message", e.getMessage()));
         }
     }
 
     // Thêm học phần vào học kỳ
     @PostMapping("/{idHocKy}/hocphan/{idHocPhan}")
-    public ResponseEntity<HocKy> themHocPhanVaoHocKy(
+    public ResponseEntity<?> themHocPhanVaoHocKy(
             @PathVariable Integer idHocKy,
             @PathVariable Integer idHocPhan) {
         try {
             HocKy hocKy = hocKyService.themHocPhanVaoHocKy(idHocKy, idHocPhan);
             return ResponseEntity.ok(hocKy);
         } catch (RuntimeException e) {
-            return ResponseEntity.badRequest().build();
+            return ResponseEntity.badRequest().body(Map.of("message", e.getMessage()));
         }
     }
 
     // Xóa học phần khỏi học kỳ
     @DeleteMapping("/{idHocKy}/hocphan/{idHocPhan}")
-    public ResponseEntity<HocKy> xoaHocPhanKhoiHocKy(
+    public ResponseEntity<?> xoaHocPhanKhoiHocKy(
             @PathVariable Integer idHocKy,
             @PathVariable Integer idHocPhan) {
         try {
             HocKy hocKy = hocKyService.xoaHocPhanKhoiHocKy(idHocKy, idHocPhan);
             return ResponseEntity.ok(hocKy);
         } catch (RuntimeException e) {
-            return ResponseEntity.badRequest().build();
+            return ResponseEntity.badRequest().body(Map.of("message", e.getMessage()));
         }
     }
 
