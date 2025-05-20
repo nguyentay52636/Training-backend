@@ -3,7 +3,11 @@
 -- https://www.phpmyadmin.net/
 --
 -- Máy chủ: 127.0.0.1
+<<<<<<< HEAD:src/main/java/org/example/Data/quanlydaotao (2).sql
 -- Thời gian đã tạo: Th5 20, 2025 lúc 01:08 PM
+=======
+-- Thời gian đã tạo: Th5 20, 2025 lúc 10:11 AM
+>>>>>>> d32fed252499793c01102e36976191cf205c1379:src/main/java/org/example/Data/quanlydaotao.sql
 -- Phiên bản máy phục vụ: 10.4.32-MariaDB
 -- Phiên bản PHP: 8.0.30
 
