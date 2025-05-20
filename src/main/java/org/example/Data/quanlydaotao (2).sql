@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Máy chủ: 127.0.0.1
--- Thời gian đã tạo: Th5 08, 2025 lúc 04:29 PM
+-- Thời gian đã tạo: Th5 20, 2025 lúc 01:08 PM
 -- Phiên bản máy phục vụ: 10.4.32-MariaDB
 -- Phiên bản PHP: 8.0.30
 
@@ -111,6 +111,7 @@ INSERT INTO `ctdt_giangvien` (`idGiangVien`, `idTaiKhoan`, `maGiangVien`, `tenGi
 
 CREATE TABLE `ctdt_hocky` (
   `idHocKy` int(11) NOT NULL,
+  `tenHocKy` varchar(255) NOT NULL,
   `idHocPhan` longtext CHARACTER SET utf8mb4 COLLATE utf8mb4_bin DEFAULT NULL CHECK (json_valid(`idHocPhan`))
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
@@ -118,13 +119,12 @@ CREATE TABLE `ctdt_hocky` (
 -- Đang đổ dữ liệu cho bảng `ctdt_hocky`
 --
 
-INSERT INTO `ctdt_hocky` (`idHocKy`, `idHocPhan`) VALUES
-(1, '[1,2,3]'),
-(2, '[3,4,5]'),
-(3, '[2,4,5]'),
-(4, '[2,4,5]'),
-(5, '[1,2,4]'),
-(8, '[1,2,3]');
+INSERT INTO `ctdt_hocky` (`idHocKy`, `tenHocKy`, `idHocPhan`) VALUES
+(1, 'Học kỳ 1', '[1,2,3]'),
+(2, 'Học kỳ 2', '[3,4,5]'),
+(3, 'Học kỳ 3', '[2,4,5]'),
+(4, 'Học kỳ 4', '[2,4,5]'),
+(5, 'Học kỳ 5', '[1,2,4]');
 
 -- --------------------------------------------------------
 
@@ -189,19 +189,22 @@ INSERT INTO `ctdt_kehoachdayhoc` (`idChuyenNganh`, `tenChuyenNganh`, `idHocKy`) 
 CREATE TABLE `ctdt_kehoachmonhom` (
   `id` int(11) NOT NULL,
   `namHoc` varchar(255) NOT NULL,
-  `soNhom` int(11) NOT NULL
+  `soNhom` int(11) NOT NULL,
+  `idHocPhan` int(11) NOT NULL,
+  `hocKy` int(11) NOT NULL,
+  `soLuongSinhVien` int(11) NOT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 --
 -- Đang đổ dữ liệu cho bảng `ctdt_kehoachmonhom`
 --
 
-INSERT INTO `ctdt_kehoachmonhom` (`id`, `namHoc`, `soNhom`) VALUES
-(1, '2023-2024', 3),
-(2, '2023-2024', 2),
-(3, '2023-2024', 2),
-(4, '2023-2024', 1),
-(5, '2023-2024', 2);
+INSERT INTO `ctdt_kehoachmonhom` (`id`, `namHoc`, `soNhom`, `idHocPhan`, `hocKy`, `soLuongSinhVien`) VALUES
+(1, '2023-2024', 3, 1, 1, 45),
+(2, '2023-2024', 2, 2, 1, 30),
+(3, '2023-2024', 2, 3, 2, 30),
+(4, '2023-2024', 1, 4, 2, 45),
+(5, '2023-2024', 2, 5, 3, 30);
 
 -- --------------------------------------------------------
 
@@ -546,6 +549,13 @@ ALTER TABLE `ctdt_khungchuongtrinh`
 ALTER TABLE `ctdt_phanconggiangday`
   ADD CONSTRAINT `FK_ctdt_phanconggiangday_ctdt_giangvien` FOREIGN KEY (`idGiangVien`) REFERENCES `ctdt_giangvien` (`idGiangVien`) ON DELETE NO ACTION ON UPDATE NO ACTION,
   ADD CONSTRAINT `FK_ctdt_phanconggiangday_ctdt_hocphan` FOREIGN KEY (`idHocPhan`) REFERENCES `ctdt_hocphan` (`idHocPhan`) ON DELETE NO ACTION ON UPDATE NO ACTION;
+
+--
+-- Các ràng buộc cho bảng `ctdt_kehoachmonhom`
+--
+ALTER TABLE `ctdt_kehoachmonhom`
+  ADD CONSTRAINT `FK_ctdt_kehoachmonhom_ctdt_hocphan` FOREIGN KEY (`idHocPhan`) REFERENCES `ctdt_hocphan` (`idHocPhan`) ON DELETE NO ACTION ON UPDATE NO ACTION;
+
 COMMIT;
 
 /*!40101 SET CHARACTER_SET_CLIENT=@OLD_CHARACTER_SET_CLIENT */;
