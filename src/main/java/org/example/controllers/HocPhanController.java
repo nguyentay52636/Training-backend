@@ -22,38 +22,61 @@ public class HocPhanController {
     // Thêm học phần mới
     @PostMapping
     public ResponseEntity<?> themHocPhan(@Valid @RequestBody HocPhan hocPhan) {
-        HocPhan savedHocPhan = hocPhanService.themHocPhan(hocPhan);
-        return ResponseEntity.ok(savedHocPhan);
+        try {
+            HocPhan savedHocPhan = hocPhanService.themHocPhan(hocPhan);
+            return ResponseEntity.ok(savedHocPhan);
+        } catch (RuntimeException e) {
+            return ResponseEntity.badRequest().body(Map.of("error", e.getMessage()));
+        }
     }
 
     // Cập nhật học phần
-    @PutMapping("/{maHP}")
+    @PutMapping("/{idHocPhan}")
     public ResponseEntity<?> capNhatHocPhan(
-            @PathVariable String maHP,
+            @PathVariable int idHocPhan,
             @Valid @RequestBody HocPhan hocPhan) {
-        HocPhan updatedHocPhan = hocPhanService.capNhatHocPhan(maHP, hocPhan);
-        return ResponseEntity.ok(updatedHocPhan);
+        try {
+            HocPhan updatedHocPhan = hocPhanService.capNhatHocPhan(idHocPhan, hocPhan);
+            return ResponseEntity.ok(updatedHocPhan);
+        } catch (RuntimeException e) {
+            return ResponseEntity.badRequest().body(Map.of("error", e.getMessage()));
+        }
     }
 
     // Xóa học phần
-    @DeleteMapping("/{maHP}")
-    public ResponseEntity<?> xoaHocPhan(@PathVariable String maHP) {
-        hocPhanService.xoaHocPhan(maHP);
-        return ResponseEntity.ok(Map.of("message", "Xóa học phần thành công"));
+    @DeleteMapping("/{idHocPhan}")
+    public ResponseEntity<?> xoaHocPhan(@PathVariable int idHocPhan) {
+        try {
+            hocPhanService.xoaHocPhan(idHocPhan);
+            return ResponseEntity.ok(Map.of("message", "Xóa học phần thành công"));
+        } catch (RuntimeException e) {
+            return ResponseEntity.badRequest().body(Map.of("error", e.getMessage()));
+        }
     }
 
-    // Lấy học phần theo mã
-    @GetMapping("/{maHP}")
-    public ResponseEntity<?> layHocPhanTheoMa(@PathVariable String maHP) {
-        HocPhan hocPhan = hocPhanService.layHocPhanTheoMa(maHP);
-        return ResponseEntity.ok(hocPhan);
+    // Lấy học phần theo ID
+    @GetMapping("/{idHocPhan}")
+    public ResponseEntity<?> layHocPhanTheoId(@PathVariable int idHocPhan) {
+        try {
+            HocPhan hocPhan = hocPhanService.layHocPhanTheoId(idHocPhan);
+            return ResponseEntity.ok(hocPhan);
+        } catch (RuntimeException e) {
+            return ResponseEntity.badRequest().body(Map.of("error", e.getMessage()));
+        }
     }
 
     // Lấy tất cả học phần
     @GetMapping
     public ResponseEntity<?> layTatCaHocPhan() {
-        List<HocPhan> danhSachHocPhan = hocPhanService.layTatCaHocPhan();
-        return ResponseEntity.ok(danhSachHocPhan);
+        try {
+            List<HocPhan> danhSachHocPhan = hocPhanService.layTatCaHocPhan();
+            if (danhSachHocPhan.isEmpty()) {
+                return ResponseEntity.ok(Map.of("message", "Không có học phần nào trong hệ thống"));
+            }
+            return ResponseEntity.ok(danhSachHocPhan);
+        } catch (RuntimeException e) {
+            return ResponseEntity.badRequest().body(Map.of("error", e.getMessage()));
+        }
     }
 
     // Tìm kiếm theo từ khóa (mã hoặc tên)

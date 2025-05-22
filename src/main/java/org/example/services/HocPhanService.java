@@ -31,12 +31,13 @@ public class HocPhanService {
 
     // Cập nhật học phần
     @Transactional
-    public HocPhan capNhatHocPhan(String maHP, HocPhan hocPhan) {
-        HocPhan existingHocPhan = hocPhanRepository.findByMaHP(maHP)
-                .orElseThrow(() -> new RuntimeException("Không tìm thấy học phần với mã: " + maHP));
+    public HocPhan capNhatHocPhan(int idHocPhan, HocPhan hocPhan) {
+        HocPhan existingHocPhan = hocPhanRepository.findById(idHocPhan)
+                .orElseThrow(() -> new RuntimeException("Không tìm thấy học phần với ID: " + idHocPhan));
         
         // Nếu thay đổi mã HP, kiểm tra mã mới đã tồn tại chưa
-        if (!maHP.equals(hocPhan.getMaHP()) && hocPhanRepository.existsByMaHP(hocPhan.getMaHP())) {
+        if (!existingHocPhan.getMaHP().equals(hocPhan.getMaHP()) && 
+            hocPhanRepository.existsByMaHP(hocPhan.getMaHP())) {
             throw new RuntimeException("Mã học phần mới đã tồn tại: " + hocPhan.getMaHP());
         }
 
@@ -59,16 +60,17 @@ public class HocPhanService {
 
     // Xóa học phần
     @Transactional
-    public void xoaHocPhan(String maHP) {
-        HocPhan hocPhan = hocPhanRepository.findByMaHP(maHP)
-                .orElseThrow(() -> new RuntimeException("Không tìm thấy học phần với mã: " + maHP));
+    public void xoaHocPhan(int idHocPhan) {
+        HocPhan hocPhan = hocPhanRepository.findById(idHocPhan)
+                .orElseThrow(() -> new RuntimeException("Không tìm thấy học phần với ID: " + idHocPhan));
+                    
         hocPhanRepository.delete(hocPhan);
     }
 
-    // Lấy học phần theo mã
-    public HocPhan layHocPhanTheoMa(String maHP) {
-        return hocPhanRepository.findByMaHP(maHP)
-                .orElseThrow(() -> new RuntimeException("Không tìm thấy học phần với mã: " + maHP));
+    // Lấy học phần theo ID
+    public HocPhan layHocPhanTheoId(int idHocPhan) {
+        return hocPhanRepository.findById(idHocPhan)
+                .orElseThrow(() -> new RuntimeException("Không tìm thấy học phần với ID: " + idHocPhan));
     }
 
     // Lấy tất cả học phần

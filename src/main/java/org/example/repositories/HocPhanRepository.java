@@ -8,9 +8,6 @@ import java.util.Optional;
 
 @Repository
 public interface HocPhanRepository extends JpaRepository<HocPhan, Integer> {
-    // Tìm kiếm theo mã học phần
-    Optional<HocPhan> findByMaHP(String maHP);
-    
     // Tìm kiếm theo tên học phần (không phân biệt hoa thường)
     List<HocPhan> findByTenHPContainingIgnoreCase(String tenHP);
     
